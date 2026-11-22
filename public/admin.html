@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dialarr — admin console</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="auth-gate" class="admin hidden">
+    <h1>ADMIN CONSOLE</h1>
+    <p style="margin-bottom:1rem; font-size:0.85rem; opacity:0.8">this console is password protected</p>
+    <section>
+      <div class="row">
+        <div style="flex:2"><label>admin password (from ADMIN_PASSWORD)</label><input id="auth-pw" type="password" placeholder="password" autocomplete="current-password"></div>
+      </div>
+      <div class="row" style="margin-top:0.5rem">
+        <button id="auth-pw-go">unlock</button>
+        <span class="status" id="auth-err"></span>
+      </div>
+    </section>
+  </div>
+
+  <div class="admin" id="admin-console">
+    <h1>Dialarr Admin Console <button id="admin-logout" class="hidden" style="float:right; font-size:0.7rem">sign out</button></h1>
+    <p style="margin-bottom:1rem; font-size:0.85rem; opacity:0.8"><a href="/">← back to the TV</a></p>
+    <div id="auth-warn"></div>
+
+
+    <nav class="tabs" id="tabs" role="tablist">
+      <button class="tab active" data-tab="channels" role="tab">CHANNELS</button>
+      <button class="tab" data-tab="onair" role="tab">ON AIR</button>
+      <button class="tab" data-tab="transcode" role="tab">TRANSCODE</button>
+      <button class="tab" data-tab="flags" role="tab">FLAGS<span class="badge" id="flags-badge"></span></button>
+      <button class="tab" data-tab="site" role="tab">SITE</button>
+      <button class="tab" data-tab="members" role="tab">MEMBERS &amp; CHAT</button>
+      <button class="tab" data-tab="backup" role="tab">BACKUP</button>
+      <button class="tab" data-tab="info" role="tab">INFO</button>
+    </nav>
+
+    <div class="tab-panel hidden" id="tab-site">
+    <section>
+      <h2>SITE</h2>
+      <div class="row">
+        <div style="flex:2"><label>site name — shown to viewers and in the browser tab</label><input id="site-name-in" placeholder="e.g. DIALARR"></div>
+        <div style="flex:2"><label>☕ "buy me a coffee" link — shown at the bottom of the page, blank hides it</label><input id="coffee-in" placeholder="https://ko-fi.com/…"></div>
+        <div style="flex:2"><label>patreon link — shown at the bottom of the page, blank hides it</label><input id="patreon-in" placeholder="https://patreon.com/…"></div>
+      </div>
+      <div class="row" style="margin-top:0.5rem">
+        <button id="site-save">save</button>
+        <span class="status" id="site-status"></span>
+      </div>
+    </section>
+    <section>
+      <h2>SITE ACCESS</h2>
+      <div class="row">
+        <div style="flex:2"><label>
+          main site password — viewers must enter this to open the site (leave blank for no password)
+          <input id="site-pw" type="password" placeholder="blank = open" autocomplete="new-password" style="margin-top:0.3rem">
+        </label></div>
+      </div>
+      <div class="row" style="margin-top:0.5rem">
+        <button id="site-pw-save">save</button>
+        <span class="status" id="site-pw-status"></span>
+      </div>
+      <div class="status" id="site-pw-state" style="margin-top:0.4rem"></div>
+    </section>
+    <section>
+      <h2>THEME</h2>
+      <div class="row" id="theme-presets" style="margin-bottom:0.5rem"></div>
+      <div class="row" id="theme-colors"></div>
+      <div class="row" style="margin-top:0.5rem">
+        <button id="theme-save">save</button>
+        <button id="theme-reset">reset to defaults</button>
+        <span class="status" id="theme-status"></span>
+      </div>
+    </section>
+    <section>
+      <h2>FOOTER BOXES</h2>
+      <p style="font-size:0.8rem;opacity:0.8;margin-bottom:0.6rem">The boxes at the bottom of the TV page. Plain text — <code>{{site}}</code> becomes the site name and any link is picked up automatically.</p>
+      <div id="info-boxes"></div>
+      <div class="row" style="margin-top:0.5rem">
+        <button id="info-add">+ add a box</button>
+        <button id="info-reset">reset to defaults</button>
+        <button id="info-save">save</button>
+        <span class="status" id="info-status"></span>
+      </div>
+    </section>
+    </div>
+
+    <div class="tab-panel hidden" id="tab-members">
+    <section>
+      <h2>MEMBERS</h2>
+      <p style="font-size:0.78rem; opacity:0.7; margin-bottom:0.5rem">members are the people allowed to chat when chat is set to "members only" below. passwords are stored as hashes — there is no way to read one back, only to reset it.</p>
+      <div class="row">
+        <div style="flex:2"><label>username <input id="new-user" placeholder="2-20 chars: a-z 0-9 - _" style="margin-top:0.3rem"></label></div>
+        <div style="flex:2"><label>password <input id="new-pass" type="password" placeholder="at least 4 characters" style="margin-top:0.3rem"></label></div>
+        <div style="flex:0 0 auto"><button id="user-add">add member</button></div>
+      </div>
+      <div class="status" id="user-status" style="margin-top:0.4rem"></div>
+      <div id="user-list" style="margin-top:0.4rem"></div>
+      <div class="row" style="margin-top:1rem;align-items:flex-start">
+        <div style="flex:1"><label>names nobody may have — one per line, or separated by commas or semicolons.
+          <textarea id="blocked-names" rows="3" placeholder="admin, moderator, fuc*"></textarea>
+          <span style="opacity:0.6;font-size:0.72rem">* stands for any run of characters, so <code>fuc*</code> blocks everything from there on. a name on this list is refused when it is added.</span>
+        </label></div>
+        <div style="flex:0 0 auto"><button id="blocked-save">save</button></div>
+      </div>
+      <div class="status" id="blocked-status" style="margin-top:0.4rem"></div>
+    </section>
+    <section>
+      <h2>CHAT &amp; EFFECTS</h2>
+      <div class="row">
+        <div style="flex:2"><label>
+          <input id="fx-tog" type="checkbox" checked style="width:auto;vertical-align:middle;margin-right:.4rem">
+          emoji / fireworks / confetti pop up over the video for everyone when triggered in chat
+        </label></div>
+      </div>
+      <div class="row" style="margin-top:0.5rem">
+        <div style="flex:2"><label>
+          max chat <b>characters</b> / minute per viewer
+          <input id="fx-rate" type="number" min="0" step="10" value="560" style="width:6rem;vertical-align:middle;margin:0 .3rem">
+          (0 = unlimited · one message is capped at 280 chars, so 560 ≈ 2 messages/min) — keeps spammers in check
+        </label></div>
+      </div>
+      <div class="row" style="margin-top:0.5rem">
+        <div style="flex:2"><span style="font-size:0.8rem">who can chat:</span>
+          <label style="display:inline; margin:0.4rem 0.8rem 0 0"><input id="cm-open" type="radio" name="chat-mode" value="open" checked style="width:auto;vertical-align:middle;margin-right:.3rem"> anyone (open)</label>
+          <label style="display:inline"><input id="cm-users" type="radio" name="chat-mode" value="users" style="width:auto;vertical-align:middle;margin-right:.3rem"> members only — viewers sign in</label>
+        </div>
+      </div>
+      <div class="row" style="margin-top:0.5rem">
+        <div style="flex:2"><label>
+          <input id="vc-tog" type="checkbox" checked style="width:auto;vertical-align:middle;margin-right:.4rem">
+          show viewer count ("N watching") in the chat
+        </label></div>
+      </div>
+      <div class="row" style="margin-top:0.5rem">
+        <div style="flex:2"><label>
+          &nbsp;&nbsp;&nbsp;&nbsp;only show it at
+          <input id="vc-min" type="number" min="0" step="1" value="50" style="width:5rem;vertical-align:middle;margin:0 .3rem">
+          viewers (default 50 — quiet rooms stay quiet)
+        </label></div>
+      </div>
+      <div class="row" style="margin-top:0.5rem">
+        <button id="fx-save">save</button>
+        <span class="status" id="fx-status"></span>
+      </div>
+    </section>
+    </div>
+
+    <div class="tab-panel hidden" id="tab-backup">
+    <section>
+      <h2>BACKUP &amp; MOVE</h2>
+      <p style="font-size:0.78rem; opacity:0.7; margin-bottom:0.5rem">
+        this site backs itself up automatically — daily, and right before every import — keeping about 7 days under data/backups.
+        export grabs everything except the videos themselves — channels, schedules, shows, users, settings.
+        on the new machine, drop the videos in the same places and import this file.
+      </p>
+      <div class="row" style="align-items:flex-end">
+        <div style="flex:0 0 auto"><button id="bk-now">💾 backup now</button></div>
+        <div style="flex:0 0 auto"><button id="bk-export">⬇ export backup</button></div>
+        <div style="flex:1;min-width:180px"><label>import backup (replaces everything here)
+          <input type="file" id="bk-import-file" accept="application/json,.json" style="display:block; margin-top:0.3rem">
+        </label></div>
+        <div style="flex:0 0 auto"><button id="bk-import">⬆ import</button></div>
+      </div>
+      <div class="status" id="bk-status" style="margin-top:0.4rem"></div>
+    </section>
+    </div>
+
+    <div class="tab-panel hidden" id="tab-info">
+    <section>
+      <h2>THIS BOX</h2>
+      <div id="info-box"></div>
+    </section>
+    </div>
+
+    <div class="tab-panel hidden" id="tab-flags">
+    <section>
+      <h2>FLAGS — FILES THAT WON'T PLAY</h2>
+      <p style="font-size:0.78rem; opacity:0.7; margin-bottom:0.6rem">
+        every file the cache has given up on, across every channel. a file is flagged when it can't be read
+        (missing, corrupt, or the archive has taken it down) or when it is taller than the skip limit.
+        rescan measures it again — good if it has finished downloading. replace points the episode at another file.
+        remove takes it out of the show.
+      </p>
+      <div class="row" style="margin-bottom:0.6rem">
+        <button id="flags-refresh">refresh</button>
+        <button id="flags-clean">clean up all the unplayable ones</button>
+        <span class="status" id="flags-status"></span>
+      </div>
+      <div id="flags-list"></div>
+      <h2 style="margin-top:1.2rem">REMOVED</h2>
+      <p style="font-size:0.78rem; opacity:0.7; margin-bottom:0.5rem">what has been taken out, and why it went.</p>
+      <div id="flags-log"></div>
+    </section>
+    </div>
+
+    <div class="tab-panel hidden" id="tab-transcode">
+    <section>
+      <h2>TRANSCODE (local mkv/avi → mp4)</h2>
+      <p style="font-size:0.78rem; opacity:0.7; margin-bottom:0.5rem">
+        browsers can't play mkv/avi, so each local source is converted once to a cached mp4 and streamed to everyone.
+        only the next few episodes of each channel are pre-converted (look-ahead), and the oldest cached files are
+        dropped when the size limit is hit. sources taller than the skip limit (e.g. 4K) are left alone and flagged.
+      </p>
+      <div class="row">
+        <div><label>output height (px)<input id="tc-height" type="number" min="0" step="4" value="480" style="margin-top:0.3rem" title="downscale-only — a 360p file stays 360p. 0 = keep original resolution."> <span style="opacity:0.6;font-size:0.72rem">480 = 854×480 · 0 = original</span></label></div>
+        <div><label>skip sources above (px)<input id="tc-max" type="number" min="0" step="4" value="1080" style="margin-top:0.3rem" title="don't transcode files taller than this (4K costs a lot of CPU). 0 = no limit."> <span style="opacity:0.6;font-size:0.72rem">1080 = skip 4K · 0 = no limit</span></label></div>
+        <div><label>cache limit (GB)<input id="tc-cache" type="number" min="0" step="1" value="12" style="margin-top:0.3rem" title="oldest cached mp4s are dropped past this size. The episodes that are on air and about to air are kept whatever the limit says — dropping those means reading them off the mount again. 0 = unbounded."> <span style="opacity:0.6;font-size:0.72rem">0 = unbounded</span></label></div>
+        <div><label>look-ahead (episodes)<input id="tc-look" type="number" min="0" step="1" value="2" style="margin-top:0.3rem" title="how many upcoming episodes to pre-convert per channel."> <span style="opacity:0.6;font-size:0.72rem">pre-convert this many ahead</span></label></div>
+        <div><label>max live streams<input id="tc-live" type="number" min="1" step="1" value="8" style="margin-top:0.3rem" title="max concurrent on-the-fly transcodes (when pre-convert is off). 0 = unlimited."> <span style="opacity:0.6;font-size:0.72rem">global cap on live transcodes — how many viewers may be encoding at once when pre-convert is off</span></label></div>
+        <div><label><input id="tc-pre" type="checkbox" style="margin-right:0.4rem" checked> pre-convert what's playing
+          <span style="opacity:0.6;font-size:0.72rem">on: the episode and the next one are converted in advance, so the file is encoded <b>once</b> and every viewer plays that same mp4 — one encode for the whole channel. off: nothing is converted ahead of time, so each viewer gets their own encode until the cap above is reached.</span></label></div>
+      </div>
+      <div class="row" style="margin-top:0.5rem">
+        <div><label>audio language
+          <select id="tc-audio-lang" style="margin-top:0.3rem"></select>
+          <span style="opacity:0.6;font-size:0.72rem">which audio track the encoder picks when a file has more than one</span></label></div>
+        <div><label>if the file has none
+          <select id="tc-audio-fallback" style="margin-top:0.3rem"></select>
+          <span style="opacity:0.6;font-size:0.72rem">what to play instead — an anime with no English falls back to this, or to the original mix</span></label></div>
+        <div><label>subtitle language
+          <select id="tc-sub-lang" style="margin-top:0.3rem"></select>
+          <span style="opacity:0.6;font-size:0.72rem">which subtitle track is used</span></label></div>
+        <div><label>subtitles
+          <select id="tc-sub-mode" style="margin-top:0.3rem">
+            <option value="soft">soft — beside the picture, the viewer picks</option>
+            <option value="hard">hard — burnt into the picture</option>
+            <option value="off">off — none</option>
+          </select>
+          <span style="opacity:0.6;font-size:0.72rem">a channel can say otherwise for itself</span></label></div>
+      </div>
+      <div class="row" style="margin-top:0.5rem">
+        <button id="tc-save">save</button>
+        <span class="status" id="tc-status"></span>
+      </div>
+    </section>
+      <section>
+        <h2>CACHE — RIGHT NOW</h2>
+        <div class="row" style="margin-bottom:0.6rem">
+          <button id="tc-prune">drop what's not needed</button>
+          <button id="tc-prune-all">empty the cache</button>
+          <span class="status" id="tc-prune-status"></span>
+        </div>
+        <div id="tc-cache-now" class="tc-live"></div>
+      </section>
+    </div>
+
+    <div class="tab-panel" id="tab-channels">
+      <div class="chan-split">
+        <div class="chan-left">
+    <section>
+      <h2>CHANNEL</h2>
+      <div class="row">
+        <div>
+          <label>channel</label>
+          <select id="channel"></select>
+        </div>
+        <div>
+          <label>status</label>
+          <div id="status" class="status" style="margin:0"></div>
+        </div>
+      </div>
+    </section>
+    <section>
+      <h2 id="ch-edit-title">ADD / EDIT CHANNEL</h2>
+      <div class="row">
+        <div style="flex:2"><label>name</label><input id="ch-name" placeholder="SYNDICATION"></div>
+        <div><label>emoji</label><input id="ch-emoji" placeholder="📼" style="width:90px"></div>
+        <div><label>dial #</label><input id="ch-dial" type="number" min="1" placeholder="auto" style="width:90px"></div>
+        <div><label>color</label><input id="ch-color" type="color" value="#FF6F00" style="width:58px;height:42px;padding:2px;background:#000"></div>
+      </div>
+      <div class="row" style="margin-top:0.5rem">
+        <div style="flex:2"><label>tagline (optional)</label><input id="ch-desc" placeholder="Late night classic television"></div>
+        <div><label title="Hidden channels keep all their shows and versions — they just don't appear on the main page">hide from main page</label><input id="ch-hidden" type="checkbox" style="width:26px;height:26px;cursor:pointer"></div>
+        <div><label title="This channel does the opposite of the site setting">subtitles</label>
+          <select id="ch-submode">
+            <option value="">follow the site setting</option>
+            <option value="soft">always soft</option>
+            <option value="hard">always hard</option>
+            <option value="off">none</option>
+          </select></div>
+      </div>
+      <div class="row" style="margin-top:0.5rem">
+        <button id="ch-save">+ add channel</button>
+        <button id="ch-cancel" class="hidden">cancel edit</button>
+        <span class="status" id="ch-status"></span>
+      </div>
+      <div class="row" style="margin-top:0.5rem">
+        <div style="flex:1"><button id="gen-lineup" style="width:100%">✨ auto-generate a full lineup — themed TV + movie channels from the whole library</button></div>
+      </div>
+      <div class="status" id="gen-status"></div>
+      <h2 style="margin-top:1rem">EXISTING CHANNELS</h2>
+      <label style="margin:0.3rem 0"><input type="checkbox" id="sort-dial" style="width:auto;vertical-align:middle;margin-right:.4rem"> organize by channel number</label>
+      <div id="ch-list"></div>
+    </section>
+        </div>
+        <div class="chan-right">
+          <section id="sec-chan-content">
+            <h2>WHAT'S ON THIS CHANNEL <span id="content-count" style="opacity:0.7"></span></h2>
+            <p style="font-size:0.78rem; opacity:0.7; margin-bottom:0.6rem">
+              every show added to this channel, and every file in it. open a show to take single files out.
+              the lineup is what actually goes on air, so build or publish the channel afterwards to make the change real.
+            </p>
+            <div id="chan-content"></div>
+          </section>
+          <div class="chan-mode">
+            <button id="mode-add" class="mode active">add by hand</button>
+            <button id="mode-lib" class="mode">build from my library</button>
+          </div>
+          <div id="chan-add">
+    <section id="sec-content">
+      <h2>ADD CONTENT</h2>
+      <div class="row">
+        <div>
+          <label>title</label>
+          <input id="i-title" placeholder="Show Name ('93)">
+        </div>
+        <div style="flex:2">
+          <label>src — local /media/… or an archive.org URL</label>
+          <input id="i-src" placeholder="/media/tape.mp4 or https://archive.org/download/…">
+        </div>
+      </div>
+      <div class="row" style="margin-top:0.5rem">
+        <div style="flex:2">
+          <label>length — pick a preset, detect it, or type seconds</label>
+          <div class="row">
+            <input id="i-dur" type="number" min="1" placeholder="seconds" style="width:110px;flex:none">
+            <button id="i-detect" title="read the length straight from the file/URL">⏱ detect</button>
+            <button data-dur="60">1m</button>
+            <button data-dur="300">5m</button>
+            <button data-dur="600">10m</button>
+            <button data-dur="900">15m</button>
+            <button data-dur="1800">30m</button>
+            <button data-dur="3600">1h</button>
+          </div>
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer">
+            <input id="i-ad" type="checkbox" style="width:auto"> this is a real commercial video
+          </label>
+        </div>
+      </div>
+      <div class="row" style="margin-top:0.5rem">
+        <button id="add-item">+ add to lineup</button>
+        <span class="status" id="add-status"></span>
+      </div>
+    </section>
+    <section id="sec-commercial">
+      <h2>ADD COMMERCIAL <span style="opacity:0.7">(generated)</span></h2>
+      <p style="font-size:0.8rem;opacity:0.75;margin-bottom:0.6rem">
+        For content with <b>no built-in commercials</b>: generate a short on-screen ad —
+        rotating quips over the channel theme + background music. No video file needed.
+      </p>
+      <div class="row">
+        <div>
+          <label>length (s)</label>
+          <div class="row">
+            <input id="c-dur" type="number" min="4" value="15" style="width:90px;flex:none">
+            <button data-cdur="10">10s</button>
+            <button data-cdur="15">15s</button>
+            <button data-cdur="20">20s</button>
+            <button data-cdur="30">30s</button>
+          </div>
+        </div>
+        <div>
+          <label>background music (optional — blank for silent)</label>
+          <input id="c-music" value="/media/ad-music.mp3" placeholder="/media/your-loop.mp3">
+        </div>
+      </div>
+      <div style="margin-top:0.5rem">
+        <label>quips — one per line, one shown at a time (edit these or regenerate)</label>
+        <textarea id="c-lines" rows="4" style="width:100%;background:#000;color:var(--text);border:1px solid var(--orange);padding:0.4rem;font-family:inherit"></textarea>
+        <button id="c-regen" style="margin-top:0.3rem">🎲 regenerate quips for this channel</button>
+      </div>
+      <div class="row" style="margin-top:0.5rem">
+        <button id="add-commercial">+ add commercial to lineup</button>
+        <span class="status" id="c-status"></span>
+      </div>
+    </section>
+    <section id="sec-lib">
+      <h2>BUILD A CHANNEL FROM YOUR LIBRARY</h2>
+      <p style="font-size:0.8rem;opacity:0.75;margin-bottom:0.7rem">
+        The guided way to run a whole show (or a season folder) on a channel. Pick episodes →
+        add them as a <b>show</b> → build the playlist. Round-robin plays one episode from each
+        show in turn (Voyager 1 → TNG 1 → Voyager 2 → TNG 2…); <b>straight through</b> plays
+        show A fully, then show B. A commercial can drop after every episode.
+        Content root: <code id="lib-root" class="mono" style="opacity:0.7">…</code>
+      </p>
+
+      <div class="build-grid">
+        <!-- step 1: library -->
+        <div class="build-col">
+          <h3 class="sub">1 · pick episodes</h3>
+          <label style="display:flex;align-items:flex-start;gap:0.4rem;font-size:0.76rem;margin:0 0 0.4rem;cursor:pointer;line-height:1.25">
+            <input id="lib-mp4" type="checkbox" checked style="width:auto;margin-top:0.15rem">
+            <span>prefer <b>.mp4</b> — when a folder has both a .mp4 and a .mkv/.avi of the same name, hide the mkv/avi (browsers can't play those). Untick to see every file.</span>
+          </label>
+          <div class="row mode-row" style="margin-bottom:0.5rem">
+            <button id="libroot-tv" class="mode active">📺 TV</button>
+            <button id="libroot-mov" class="mode">🎬 Movies</button>
+          </div>
+          <div id="lib-tree" class="lib-tree" style="max-height:520px;overflow:auto">loading…</div>
+
+          <div style="margin-top:0.7rem">
+            <label>— or paste an archive.org link (whole item or one file) —</label>
+            <div class="row">
+              <div style="flex:3"><input id="ao-url" placeholder="https://archive.org/details/…  or  …/download/…"></div>
+              <div style="flex:1;min-width:64px"><button id="ao-scan" style="width:100%">⚡ scan</button></div>
+            </div>
+            <div class="row" style="margin-top:0.3rem">
+              <div><label>min dur (s)</label><input id="ao-min" type="number" min="0" value="300" style="width:84px"></div>
+              <div><label>max dur (s)</label><input id="ao-max" type="number" min="0" value="28800" style="width:84px"></div>
+            </div>
+            <div class="status" id="ao-status"></div>
+          </div>
+
+          <div class="row" style="margin-top:0.6rem">
+            <div style="flex:1"><label>show name</label><input id="show-name" placeholder="King of the Hill"></div>
+          </div>
+          <div class="row" style="margin-top:0.5rem">
+            <span class="status" id="sel-count">0 selected</span>
+            <button id="sel-clear" style="display:none">clear</button>
+            <button id="add-show">+ add folder files</button>
+            <button id="add-ao">+ add scanned link</button>
+            <span class="status" id="show-status"></span>
+          </div>
+        </div>
+
+        <!-- step 2: shows on channel -->
+        <div class="build-col">
+          <h3 class="sub">2 · shows on <span id="show-ch-name"></span></h3>
+          <div id="shows-list" class="shows-list">—</div>
+          <div class="row" style="margin-top:0.6rem">
+            <button id="rescan-all" style="flex:1">🔄 rescan all — pick up new / removed episodes</button>
+          </div>
+          <div class="status" id="rescan-status"></div>
+
+          <h3 class="sub" style="margin-top:0.9rem">3 · build the playlist</h3>
+          <div class="row">
+            <div>
+              <label>play order</label>
+              <div class="row mode-row">
+                <button id="mode-rr" class="mode active">round-robin</button>
+                <button id="mode-smart" class="mode">smart shuffle</button>
+                <button id="mode-seq" class="mode">straight through</button>
+              </div>
+            </div>
+          </div>
+          <div class="row" style="margin-top:0.5rem">
+            <div style="flex:2">
+              <label>commercial after every <b id="every-val">1</b> episode (0 = none)</label>
+              <input id="c-every" type="range" min="0" max="10" value="1" style="width:100%">
+            </div>
+            <div>
+              <label>commercial length</label>
+              <div class="row">
+                <input id="c-len" type="hidden" value="15">
+                <button data-rlen="10">10s</button>
+                <button data-rlen="15" class="on">15s</button>
+                <button data-rlen="30">30s</button>
+              </div>
+            </div>
+          </div>
+          <div class="row" style="margin-top:0.5rem">
+            <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;flex:none;margin:0">
+              <input id="mar-on" type="checkbox" style="width:auto"> marathon mode
+            </label>
+            <div style="flex:none"><label>ep back-to-back</label><input id="mar-block" type="number" min="2" value="3" style="width:76px"></div>
+            <div style="flex:none"><label>how many shows</label><input id="mar-count" type="number" min="1" value="1" style="width:76px"></div>
+          </div>
+          <div class="row" style="margin-top:0.7rem">
+            <button id="build-pub" class="pub">▶ BUILD + GO LIVE</button>
+            <span class="status" id="build-status"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="sec-draft">
+      <h2>DRAFT LINEUP <span id="draft-count" style="opacity:0.7"></span></h2>
+      <div id="items"></div>
+    </section>
+<div class="row">
+        <button id="publish">▶ GO LIVE (from top)</button>
+        <button id="shuffle">🔀 shuffle + go live</button>
+      </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel hidden" id="tab-onair">
+    <section>
+      <h2>ON AIR — ALL CHANNELS</h2>
+      <div id="onair-list"></div>
+      <div class="status" id="onair-status"></div>
+      <p style="font-size:0.75rem; opacity:0.6; margin-top:0.5rem">
+        ⏮ start = rewind to the top of the current episode · ◀ = jump to the previous episode · ▶ = jump to the next.
+        FF/REW re-anchors the whole broadcast — every watcher jumps at once.
+      </p>
+    </section>
+
+    </div>
+  </div>
+
+  <script>
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  let lineup = null;
+  let adminSettings = {}; // the settings, and the language list the server offers
+  let draft = []; // items for the selected channel
+  let draftShowAll = false; // a big channel has thousands of items — draw the first ones only
+  // A draft per channel: switching to another channel and back must not throw
+  // away a half-built lineup.
+  const drafts = new Map(); // channel id -> draft items
+  const draftEdited = new Set(); // channel ids whose draft has been changed
+  function curId() { return $('channel').value; }
+  function touchDraft() { const id = curId(); if (!id) return; drafts.set(id, draft); draftEdited.add(id); }
+  function dropDraft(id) { drafts.delete(id); draftEdited.delete(id); }
+
+  async function api(path, body) {
+    const r = await fetch(path, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : undefined);
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || r.status);
+    return j;
+  }
+  function setStatus(el, ok, text) { el.className = 'status ' + (ok ? 'ok' : 'err'); el.textContent = text; }
+
+  function genQuips(name) {
+    const n = name || 'this channel';
+    return [
+      `you're watching ${n}. no signal, just vibes.`,
+      `brought to you by ${n} — where the tapes never sleep.`,
+      `this broadcast is paid for in coffee. ☕`,
+      `stay tuned. it gets weirder by channel 5.`,
+      `thank you for watching ${n}. see you in a moment.`
+    ];
+  }
+
+  function escapeHtml(s) { return String(s).replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c])); }
+
+  async function load() {
+    lineup = await (await fetch('/api/admin/lineup')).json();
+    if (!lineup || !Array.isArray(lineup.channels)) return; // still locked
+    const sel = $('channel');
+    sel.innerHTML = '';
+    lineup.channels.forEach((c) => {
+      const o = document.createElement('option');
+      o.value = c.id; o.textContent = `${c.dial} ${c.emoji} ${c.name}`;
+      sel.appendChild(o);
+    });
+    selectChannel(sel.value);
+    renderChannelList();
+    renderOnair();
+  }
+
+  async function loadSite() {
+    try {
+      const s = await (await fetch('/api/admin/settings')).json();
+      if (s.siteName) { $('site-name-in').value = s.siteName; document.title = s.siteName + ' — admin console'; }
+      if (s.coffeeLink) $('coffee-in').value = s.coffeeLink;
+      if (s.patreonLink) $('patreon-in').value = s.patreonLink;
+      if (Array.isArray(s.infoBoxes)) renderInfoBoxes(s.infoBoxes);
+    } catch (e) { /* keep blank */ }
+  }
+  $('site-save').onclick = async () => {
+    try {
+      const r = await api('/api/admin/settings', {
+        siteName: $('site-name-in').value.trim(),
+        coffeeLink: $('coffee-in').value.trim(),
+        patreonLink: $('patreon-in').value.trim()
+      });
+      document.title = (r.settings.siteName || 'Dialarr') + ' — admin console';
+      setStatus($('site-status'), true, 'saved — viewers see it immediately');
+    } catch (e) { setStatus($('site-status'), false, e.message); }
+  };
+
+  // --- footer boxes -------------------------------------------------------
+  function renderInfoBoxes(boxes) {
+    const host = $('info-boxes');
+    host.textContent = '';
+    for (const b of boxes) host.appendChild(infoBoxRow(b.title || '', b.body || ''));
+  }
+  function infoBoxRow(title, body) {
+    const row = document.createElement('div');
+    row.className = 'info-box-row';
+    const head = document.createElement('div');
+    head.className = 'info-head';
+    const t = document.createElement('input');
+    t.placeholder = 'heading';
+    t.value = title;
+    const rm = document.createElement('button');
+    rm.textContent = 'remove';
+    rm.onclick = () => row.remove();
+    head.appendChild(t);
+    head.appendChild(rm);
+    const ta = document.createElement('textarea');
+    ta.rows = 3;
+    ta.placeholder = 'the text under the heading';
+    ta.value = body;
+    row.appendChild(head);
+    row.appendChild(ta);
+    return row;
+  }
+  $('info-add').onclick = () => $('info-boxes').appendChild(infoBoxRow('', ''));
+  $('info-reset').onclick = async () => {
+    try {
+      const r = await api('/api/admin/settings', { infoBoxes: 'default' });
+      renderInfoBoxes(r.settings.infoBoxes || []);
+      setStatus($('info-status'), true, 'reset to the built-in four');
+    } catch (e) { setStatus($('info-status'), false, e.message); }
+  };
+  $('info-save').onclick = async () => {
+    try {
+      const boxes = [];
+      for (const row of $('info-boxes').children) {
+        const t = row.querySelector('input');
+        const ta = row.querySelector('textarea');
+        boxes.push({ title: t.value.trim(), body: ta.value.trim() });
+      }
+      const r = await api('/api/admin/settings', { infoBoxes: boxes });
+      setStatus($('info-status'), true, 'saved — viewers see it immediately');
+      renderInfoBoxes(r.settings.infoBoxes || boxes);
+    } catch (e) { setStatus($('info-status'), false, e.message); }
+  };
+
+  // --- chat & effects (pop-up effects toggle + per-viewer rate limit) ---
+  function chatModeVal() { const r = document.querySelector('input[name="chat-mode"]:checked'); return r ? r.value : 'open'; }
+  async function loadFx() {
+    try {
+      const s = await (await fetch('/api/admin/settings')).json();
+      $('fx-tog').checked = s.chatEffects !== false;
+      if (typeof s.chatRateLimit === 'number') $('fx-rate').value = s.chatRateLimit;
+      (s.chatMode === 'users' ? $('cm-users') : $('cm-open')).checked = true;
+      $('vc-tog').checked = s.showViewerCount !== false;
+      if (typeof s.viewerCountMin === 'number') $('vc-min').value = s.viewerCountMin;
+    } catch (e) { /* defaults */ }
+  }
+  $('fx-save').onclick = async () => {
+    try {
+      const r = await api('/api/admin/settings', {
+        chatEffects: $('fx-tog').checked, chatRateLimit: Number($('fx-rate').value) || 0, chatMode: chatModeVal(),
+        showViewerCount: $('vc-tog').checked, viewerCountMin: Number($('vc-min').value) || 0
+      });
+      $('fx-tog').checked = r.settings.chatEffects !== false;
+      $('fx-rate').value = r.settings.chatRateLimit;
+      (r.settings.chatMode === 'users' ? $('cm-users') : $('cm-open')).checked = true;
+      $('vc-tog').checked = r.settings.showViewerCount !== false;
+      $('vc-min').value = r.settings.viewerCountMin;
+      setStatus($('fx-status'), true, 'saved — applies to everyone immediately');
+    } catch (e) { setStatus($('fx-status'), false, e.message); }
+  };
+
+  // --- transcode (local mkv/avi → cached mp4) settings ---
+  // The language lists come from the server, so the codes are the ones the
+  // files are actually tagged with.
+  function fillLangs(sel, want, none) {
+    const list = (adminSettings.langList || []);
+    sel.textContent = '';
+    if (none) {
+      const o = document.createElement('option');
+      o.value = ''; o.textContent = none;
+      sel.appendChild(o);
+    }
+    for (const l of list) {
+      const o = document.createElement('option');
+      o.value = l.code; o.textContent = l.name;
+      sel.appendChild(o);
+    }
+    if (want && !list.some((l) => l.code === want)) {
+      const o = document.createElement('option');
+      o.value = want; o.textContent = want;
+      sel.appendChild(o);
+    }
+    sel.value = want || (none ? '' : (list[0] ? list[0].code : ''));
+  }
+  async function loadTc() {
+    try {
+      const s = await (await fetch('/api/admin/settings')).json();
+      adminSettings = s || {};
+      if (typeof s.transcodeHeight === 'number') $('tc-height').value = s.transcodeHeight;
+      if (typeof s.transcodeMaxSourceHeight === 'number') $('tc-max').value = s.transcodeMaxSourceHeight;
+      if (typeof s.transcodeCacheBytes === 'number') $('tc-cache').value = Math.round(s.transcodeCacheBytes / (1024 * 1024 * 1024) * 100) / 100;
+      if (typeof s.transcodeLookahead === 'number') $('tc-look').value = s.transcodeLookahead;
+      if (typeof s.liveStreamMax === 'number') $('tc-live').value = s.liveStreamMax;
+      $('tc-pre').checked = s.preTranscode === true;
+      fillLangs($('tc-audio-lang'), s.audioLanguage || 'eng');
+      fillLangs($('tc-audio-fallback'), s.audioFallback || '', 'the original mix');
+      fillLangs($('tc-sub-lang'), s.subtitleLanguage || 'eng');
+      $('tc-sub-mode').value = s.subtitleMode || 'soft';
+    } catch (e) { /* keep the HTML defaults */ }
+  }
+  $('tc-save').onclick = async () => {
+    try {
+      const r = await api('/api/admin/settings', {
+        transcodeHeight: Number($('tc-height').value) || 0,
+        transcodeMaxSourceHeight: Number($('tc-max').value) || 0,
+        transcodeCacheBytes: Math.round((Number($('tc-cache').value) || 0) * 1024 * 1024 * 1024),
+        transcodeLookahead: Number($('tc-look').value) || 0,
+        liveStreamMax: Number($('tc-live').value) || 8,
+        preTranscode: $('tc-pre').checked,
+        audioLanguage: $('tc-audio-lang').value,
+        audioFallback: $('tc-audio-fallback').value,
+        subtitleLanguage: $('tc-sub-lang').value,
+        subtitleMode: $('tc-sub-mode').value
+      });
+      $('tc-height').value = r.settings.transcodeHeight;
+      $('tc-max').value = r.settings.transcodeMaxSourceHeight;
+      $('tc-cache').value = Math.round(r.settings.transcodeCacheBytes / (1024 * 1024 * 1024) * 100) / 100;
+      $('tc-look').value = r.settings.transcodeLookahead;
+      $('tc-live').value = r.settings.liveStreamMax;
+      $('tc-pre').checked = r.settings.preTranscode === true;
+      setStatus($('tc-status'), true, 'saved — applies to the next conversions');
+    } catch (e) { setStatus($('tc-status'), false, e.message); }
+  };
+
+  // --- members (admin-created chat users) ---
+  // The server keeps username -> scrypt hash. There is no readable password
+  // anywhere, so the only thing to do with an existing member is reset it.
+  let memberNames = new Set();
+  async function loadUsers() {
+    let names;
+    try { names = (await (await fetch('/api/admin/users')).json()).users; } catch (e) { return; }
+    if (!Array.isArray(names)) { $('user-list').innerHTML = '<span class="status err">could not read the member list</span>'; return; }
+    memberNames = new Set(names.map((n) => n.toLowerCase()));
+    const box = $('user-list'); box.innerHTML = '';
+    if (!names.length) { box.innerHTML = '<span style="opacity:0.55;font-size:0.8rem">no members yet — add one above</span>'; return; }
+    names.forEach((n) => {
+      const row = document.createElement('div'); row.className = 'item-row';
+      row.innerHTML = `<span style="flex:1">👤 ${escapeHtml(n)}</span>`;
+      const reset = document.createElement('button'); reset.textContent = 'reset password';
+      reset.title = 'type a new password for this member — the old one cannot be seen';
+      reset.onclick = () => {
+        $('new-user').value = n;
+        $('new-pass').value = '';
+        $('user-add').textContent = 'reset password';
+        $('new-pass').focus();
+        $('new-pass').scrollIntoView({ block: 'center' });
+        setStatus($('user-status'), true, `new password for “${n}” — type it above and press reset`);
+      };
+      const del = document.createElement('button'); del.textContent = '×';
+      del.onclick = async () => {
+        if (!confirm(`remove member “${n}”?`)) return;
+        try { const r = await api('/api/admin/users/delete', { username: n }); setStatus($('user-status'), true, 'removed'); loadUsers(); }
+        catch (e) { setStatus($('user-status'), false, e.message); }
+      };
+      row.appendChild(reset);
+      row.appendChild(del);
+      box.appendChild(row);
+    });
+  }
+  // names nobody may have — one per line, or separated by commas or semicolons,
+  // with * for any run of characters
+  async function loadBlocked() {
+    try {
+      const s = await (await fetch('/api/admin/settings')).json();
+      $('blocked-names').value = s.blockedUsernames || '';
+    } catch (e) { /* gated or offline */ }
+  }
+  $('blocked-save').onclick = async () => {
+    try {
+      const r = await api('/api/admin/settings', { blockedUsernames: $('blocked-names').value });
+      setStatus($('blocked-status'), true, 'saved — those names are refused from now on');
+      loadUsers();
+    } catch (e) { setStatus($('blocked-status'), false, e.message); }
+  };
+
+  $('user-add').onclick = async () => {
+    const name = $('new-user').value.trim();
+    const isReset = memberNames.has(name.toLowerCase());
+    if (isReset && !confirm(`reset the password for “${name}”?\n\nthe old password stops working immediately.`)) return;
+    try {
+      const r = await api('/api/admin/users', { username: name, password: $('new-pass').value });
+      $('new-user').value = ''; $('new-pass').value = '';
+      $('user-add').textContent = 'add member';
+      setStatus($('user-status'), true, isReset ? 'password reset' : 'member added');
+      loadUsers();
+    } catch (e) { setStatus($('user-status'), false, e.message); }
+  };
+
+  // --- backup & move (export / import the whole database) ---
+  $('bk-now').onclick = async () => {
+    try {
+      setStatus($('bk-status'), true, 'backing up…');
+      const r = await api('/api/admin/backup', {});
+      if (!r.ok) throw new Error(r.err || 'backup failed');
+      setStatus($('bk-status'), true, '✓ saved — this site keeps ~7 days of backups automatically (daily + before every import)');
+    } catch (e) { setStatus($('bk-status'), false, e.message); }
+  };
+  $('bk-export').onclick = async () => {
+    try {
+      const r = await fetch('/api/admin/export');
+      if (!r.ok) throw new Error('export failed: ' + r.status);
+      const j = await r.json();
+      const blob = new Blob([JSON.stringify(j)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      const site = (($('site-name-in') && $('site-name-in').value || '').trim().replace(/[^\w.-]+/g, '-') || 'site');
+      a.download = `dialarr-${site}-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      setStatus($('bk-status'), true, `exported ${j.lineup.channels.length} channels + ${Object.keys(j.manifests).length} manifests`);
+    } catch (e) { setStatus($('bk-status'), false, e.message); }
+  };
+  $('bk-import').onclick = async () => {
+    const f = $('bk-import-file').files[0];
+    if (!f) { setStatus($('bk-status'), false, 'pick a backup file first'); return; }
+    if (!confirm('import this backup? it replaces the channels, schedule, users and settings on this site.')) return;
+    try {
+      const j = JSON.parse(await f.text());
+      const r = await api('/api/admin/import', j);
+      $('bk-import-file').value = '';
+      setStatus($('bk-status'), true, `imported ${r.channels} channels + ${r.manifestCount} manifests`);
+      load();
+    } catch (e) { setStatus($('bk-status'), false, e.message); }
+  };
+
+  // --- theming: presets + custom colors over the 5 core CSS variables ---
+  const THEME_KEYS = [['bg', 'background'], ['panel', 'panel'], ['yellow', 'accent'], ['orange', 'orange'], ['text', 'text']];
+  const THEME_PRESETS = {
+    dialarr: { bg: '#1C0A57', panel: '#12063a', yellow: '#FFFF00', orange: '#FF6F00', text: '#F5F0FF' },
+    midnight: { bg: '#0A0E2A', panel: '#05071A', yellow: '#5AC8FF', orange: '#00B3A4', text: '#EAF2FF' },
+    sunset:   { bg: '#2A0E2E', panel: '#1A0A1E', yellow: '#FFC24B', orange: '#FF5E62', text: '#FFE9F0' },
+    mono:     { bg: '#111111', panel: '#000000', yellow: '#FFFFFF', orange: '#B0B0B0', text: '#F0F0F0' }
+  };
+  function themeColor(k) { const el = $('theme-' + k); return el ? el.value : null; }
+  function setThemeValues(theme) { THEME_KEYS.forEach(([k]) => { const el = $('theme-' + k); if (el) el.value = (theme && theme[k]) || THEME_PRESETS.dialarr[k]; }); }
+  function applyClientTheme(theme) { for (const [k] of THEME_KEYS) { const v = theme && theme[k]; if (v) document.documentElement.style.setProperty('--' + k, v); } }
+  function markPreset(name) { document.querySelectorAll('#theme-presets .mode').forEach((x) => x.classList.toggle('active', x.dataset.preset === name)); }
+  async function initTheme() {
+    const saved = ((await fetch('/api/admin/settings').then((r) => r.json()).catch(() => ({}))).theme) || {};
+    Object.keys(THEME_PRESETS).forEach((name) => {
+      const b = document.createElement('button');
+      b.className = 'mode'; b.dataset.preset = name; b.textContent = name;
+      b.onclick = () => { setThemeValues(THEME_PRESETS[name]); applyClientTheme(THEME_PRESETS[name]); markPreset(name); };
+      $('theme-presets').appendChild(b);
+    });
+    THEME_KEYS.forEach(([k, label]) => {
+      const d = document.createElement('div');
+      d.innerHTML = `<label>${label}</label><input type="color" id="theme-${k}">`;
+      $('theme-colors').appendChild(d);
+    });
+    setThemeValues(saved); markPreset('dialarr');
+    THEME_KEYS.forEach(([k]) => { $('theme-' + k).addEventListener('input', () => applyClientTheme({ [k]: themeColor(k) })); });
+    $('theme-save').onclick = async () => {
+      const theme = {}; THEME_KEYS.forEach(([k]) => { theme[k] = themeColor(k); });
+      try {
+        const r = await api('/api/admin/settings', { theme });
+        applyClientTheme(r.settings.theme); markPreset(Object.keys(THEME_PRESETS).find((p) => JSON.stringify(THEME_PRESETS[p]) === JSON.stringify(r.settings.theme)) || '');
+        setStatus($('theme-status'), true, 'saved — viewers see it immediately');
+      } catch (e) { setStatus($('theme-status'), false, e.message); }
+    };
+    $('theme-reset').onclick = () => { setThemeValues(THEME_PRESETS.dialarr); applyClientTheme(THEME_PRESETS.dialarr); markPreset('dialarr'); };
+  }
+
+  function selectChannel(id) {
+    $('channel').value = id;
+    const ch = lineup.channels.find((c) => c.id === id);
+    $('c-lines').value = genQuips(ch && ch.name).join('\n');
+    if (draftEdited.has(id)) {
+      draft = drafts.get(id) || [];
+      draftShowAll = false;
+      renderDraft();
+      setStatus($('status'), true, `draft — ${draft.length} items, not published yet`);
+    } else if (ch && ch.versions && ch.versions.length) {
+      const last = ch.versions[ch.versions.length - 1];
+      fetch('/api/admin/' + last.manifest).then((r) => r.json()).then((mv) => {
+        if (curId() !== id) return; // the user moved on while the manifest loaded
+        draft = (mv.items || []).map((it) => ({ ...it }));
+        drafts.set(id, draft);
+        draftShowAll = false;
+        renderDraft();
+        setStatus($('status'), true, `on air — v${last.v}, ${mv.items.length} items, live since ${new Date(last.effectiveAtMs).toLocaleTimeString()}`);
+      });
+    } else {
+      draft = []; drafts.set(id, draft); renderDraft();
+      setStatus($('status'), false, 'off air — no versions published yet');
+    }
+    renderShows();
+    renderChannelList();
+    renderChannelContent();
+  }
+
+  function renderDraft() {
+    $('draft-count').textContent = draft.length ? `(${draft.length} items, ${Math.round(draft.reduce((s, i) => s + (i.duration || 0), 0) / 60)} min)` : '(empty)';
+    const box = $('items'); box.innerHTML = '';
+    // One row per item, and a big channel has thousands of them — that many DOM nodes
+    // is what made the console crawl. Draw the first ones; the rest are one click away.
+    const shown = draftShowAll ? draft : draft.slice(0, 150);
+    shown.forEach((it, i) => {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `<span>${i + 1}.</span> <span>${it.title || it.id}</span>
+        <span style="opacity:0.6">${Math.round(it.duration)}s</span>`;
+      if ((it.duration || 0) > 1800) { const b = document.createElement('span'); b.className = 'ad long'; b.textContent = '⚠ ' + Math.round(it.duration / 60) + 'm'; b.title = 'Very long file — may be a full-season tape with several episodes clumped in one.'; row.appendChild(b); }
+      if (it.adSlides) { const b = document.createElement('span'); b.className = 'ad gen'; b.textContent = 'AD·GEN'; row.appendChild(b); }
+      else if (it.isAd) { const b = document.createElement('span'); b.className = 'ad'; b.textContent = 'AD'; row.appendChild(b); }
+      row.style.flex = '1';
+      const mk = (label, fn) => { const b = document.createElement('button'); b.textContent = label; b.onclick = fn; row.appendChild(b); };
+      mk('↑', () => { if (i > 0) [draft[i - 1], draft[i]] = [draft[i], draft[i - 1]]; touchDraft(); renderDraft(); });
+      mk('↓', () => { if (i < draft.length - 1) [draft[i + 1], draft[i]] = [draft[i], draft[i + 1]]; touchDraft(); renderDraft(); });
+      mk('×', () => { draft.splice(i, 1); touchDraft(); renderDraft(); });
+      box.appendChild(row);
+    });
+    if (shown.length < draft.length) {
+      const more = document.createElement('button');
+      more.className = 'mini';
+      more.textContent = `…and ${draft.length - shown.length} more — show all`;
+      more.onclick = () => { draftShowAll = true; renderDraft(); };
+      box.appendChild(more);
+    }
+  }
+
+  $('channel').onchange = (e) => selectChannel(e.target.value);
+
+  // --- channel management (add / edit / delete) ---
+  let editingId = null;
+  function renderChannelList() {
+    if (!lineup) return;
+    const box = $('ch-list'); box.innerHTML = '';
+    $('sort-dial').checked = lineup.channels.every((c, i) => i === 0 || (lineup.channels[i - 1].dial || 0) <= (c.dial || 0));
+    lineup.channels.forEach((c, i) => {
+      const row = document.createElement('div'); row.className = 'item-row';
+      if (c.id === $('channel').value) row.classList.add('sel');
+      row.innerHTML = `<span style="font-weight:bold">${c.dial}</span><span style="font-size:1.1rem">${escapeHtml(c.emoji)}</span>`;
+      const pick = document.createElement('span');
+      pick.className = 'pick'; pick.style.flex = '1';
+      pick.innerHTML = escapeHtml(c.name) + (c.hidden ? ' <span style="opacity:0.6;font-size:0.8rem" title="Hidden from the main page — content is kept">hidden</span>' : '') + (c.subtitleMode ? ' <span style="opacity:0.6;font-size:0.8rem" title="This channel does its own thing with subtitles">' + c.subtitleMode + ' subs</span>' : '');
+      pick.onclick = () => selectChannel(c.id);
+      row.appendChild(pick);
+      const ver = document.createElement('span'); ver.className = 'ver'; ver.style.opacity = '0.55';
+      ver.textContent = (c.versions || []).length ? c.versions.length + ' ver.' : 'no content';
+      row.appendChild(ver);
+      const mk = (label, fn) => { const b = document.createElement('button'); b.textContent = label; b.onclick = fn; row.appendChild(b); return b; };
+      const up = mk('↑', () => moveChannel(i, -1)); if (i === 0) up.disabled = true;
+      const dn = mk('↓', () => moveChannel(i, 1)); if (i === lineup.channels.length - 1) dn.disabled = true;
+      mk('edit', () => startEdit(c));
+      mk('×', () => delChannel(c));
+      box.appendChild(row);
+    });
+  }
+  async function applyOrder(ids) {
+    try {
+      await api('/api/admin/channels/reorder', { order: ids });
+      load();
+    } catch (e) { setStatus($('ch-status'), false, e.message); }
+  }
+  function moveChannel(i, d) {
+    const ids = lineup.channels.map((c) => c.id);
+    const j = i + d;
+    if (j < 0 || j >= ids.length) return;
+    [ids[i], ids[j]] = [ids[j], ids[i]];
+    applyOrder(ids);
+  }
+  $('sort-dial').onchange = (e) => {
+    if (!e.target.checked) return; // unchecking just leaves the manual order for the arrows
+    applyOrder(lineup.channels.slice().sort((a, b) => (a.dial || 0) - (b.dial || 0)).map((c) => c.id));
+  };
+  function startEdit(c) {
+    editingId = c.id;
+    $('ch-name').value = c.name; $('ch-emoji').value = c.emoji; $('ch-dial').value = c.dial;
+    $('ch-color').value = c.color || '#FF6F00'; $('ch-desc').value = c.description || '';
+    $('ch-hidden').checked = !!c.hidden;
+    $('ch-submode').value = c.subtitleMode || '';
+    $('ch-save').textContent = '💾 save changes'; $('ch-cancel').classList.remove('hidden');
+    $('ch-edit-title').textContent = 'EDIT CHANNEL — ' + c.name;
+    $('ch-status').textContent = ''; $('ch-status').className = 'status';
+  }
+  function resetChForm() {
+    editingId = null;
+    ['ch-name', 'ch-emoji', 'ch-dial', 'ch-desc'].forEach((id) => { $(id).value = ''; });
+    $('ch-hidden').checked = false;
+    $('ch-color').value = '#FF6F00';
+    $('ch-submode').value = '';
+    $('ch-save').textContent = '+ add channel'; $('ch-cancel').classList.add('hidden');
+    $('ch-edit-title').textContent = 'ADD / EDIT CHANNEL';
+  }
+  $('ch-cancel').onclick = () => { resetChForm(); };
+  $('gen-lineup').onclick = async () => {
+    if (!confirm('Auto-generate a full lineup from the whole library?\n\n• themed TV channels (comedy, sci-fi, kids, crime, drama)\n• era channels (80s / 90s / 2000s / 2010s+)\n• Long-Run Legends + Binge-Shorts overlays\n• movie channels (action, comedy, sci-fi, horror, crime, classics, modern, and a Movie Night with everything)\n\nChannels already named the same are skipped. Length detection runs over the whole library, so this can take several minutes.')) return;
+    try {
+      await api('/api/admin/generate', {});
+      setStatus($('gen-status'), true, 'generating in the background…');
+      const tick = async () => {
+        let s;
+        try { s = await (await fetch('/api/admin/generate/status')).json(); } catch (e) { return setTimeout(tick, 4000); }
+        if (s.running) { setStatus($('gen-status'), true, (s.done || 0) + '/' + (s.total || '?') + ' — ' + s.phase); return setTimeout(tick, 4000); }
+        const made = (s.made || []).map((m) => m.name + ' (' + m.episodes + ')').join('  ·  ');
+        setStatus($('gen-status'), !String(s.phase).startsWith('error'), '✓ ' + (s.made || []).length + ' channels: ' + made + ((s.skipped || []).length ? ' — skipped: ' + s.skipped.join(', ') : ''));
+        load();
+      };
+      setTimeout(tick, 2000);
+    } catch (e) { setStatus($('gen-status'), false, e.message); }
+  };
+  $('ch-save').onclick = async () => {
+    const body = { name: $('ch-name').value.trim(), emoji: $('ch-emoji').value.trim() || '📺', color: $('ch-color').value, description: $('ch-desc').value.trim(), hidden: $('ch-hidden').checked, subtitleMode: $('ch-submode').value };
+    if ($('ch-dial').value) body.dial = parseInt($('ch-dial').value, 10) || 0;
+    if (!body.name) { setStatus($('ch-status'), false, 'name required'); return; }
+    try {
+      if (editingId) {
+        body.id = editingId;
+        await api('/api/admin/channels/update', body);
+        setStatus($('ch-status'), true, 'saved — the TV updates live');
+      } else {
+        const r = await api('/api/admin/channels', body);
+        setStatus($('ch-status'), true, `added “${r.channel.name}” on dial ${r.channel.dial}`);
+      }
+      resetChForm(); load();
+    } catch (e) { setStatus($('ch-status'), false, e.message); }
+  };
+  async function delChannel(c) {
+    if (!confirm(`Delete channel “${c.name}”?`)) return;
+    try {
+      await api('/api/admin/channels/delete', { id: c.id });
+      setStatus($('ch-status'), true, 'deleted');
+      if (editingId === c.id) resetChForm();
+      load();
+    } catch (e) { setStatus($('ch-status'), false, e.message); }
+  }
+
+  $('add-item').onclick = () => {
+    const src = $('i-src').value.trim();
+    const dur = Math.max(1, parseInt($('i-dur').value, 10) || 0);
+    if (!src || !dur) { setStatus($('add-status'), false, 'need src + duration'); return; }
+    draft.push({ title: $('i-title').value.trim(), src, duration: dur, isAd: $('i-ad').checked, year: '' });
+    touchDraft();
+    $('i-title').value = ''; $('i-src').value = ''; $('i-dur').value = ''; $('i-ad').checked = false;
+    setStatus($('add-status'), true, 'added — hit GO LIVE to publish');
+    renderDraft();
+  };
+
+  // duration presets + detect-from-file
+  document.querySelectorAll('[data-dur]').forEach((b) => { b.onclick = () => { $('i-dur').value = b.dataset.dur; }; });
+  document.querySelectorAll('[data-cdur]').forEach((b) => { b.onclick = () => { $('c-dur').value = b.dataset.cdur; }; });
+  $('i-detect').onclick = async () => {
+    const src = $('i-src').value.trim();
+    if (!src) { setStatus($('add-status'), false, 'enter a src first'); return; }
+    setStatus($('add-status'), true, 'detecting…');
+    try { const j = await api('/api/admin/probe', { src }); $('i-dur').value = j.duration; setStatus($('add-status'), true, `detected ${j.duration}s`); }
+    catch (e) { setStatus($('add-status'), false, e.message + ' — type it or use a preset'); }
+  };
+
+  // generated commercial builder
+  $('c-regen').onclick = () => { const ch = lineup.channels.find((c) => c.id === $('channel').value); $('c-lines').value = genQuips(ch && ch.name).join('\n'); };
+  $('add-commercial').onclick = () => {
+    const dur = Math.max(4, parseInt($('c-dur').value, 10) || 15);
+    const music = $('c-music').value.trim();
+    const lines = $('c-lines').value.split('\n').map((s) => s.trim()).filter(Boolean);
+    if (!lines.length) { setStatus($('c-status'), false, 'need at least one quip'); return; }
+    draft.push({ title: 'Commercial', src: '', duration: dur, isAd: true, adSlides: lines, music: music || undefined, year: '' });
+    touchDraft();
+    setStatus($('c-status'), true, `added a ${dur}s commercial (${lines.length} quips) — hit GO LIVE to publish`);
+    renderDraft();
+  };
+
+  $('publish').onclick = async () => {
+    if (!draft.length) { setStatus($('status'), false, 'nothing to publish'); return; }
+    try {
+      const id = curId();
+      const r = await api('/api/admin/publish', { channel: id, items: draft, startIndex: 0 });
+      dropDraft(id); // the published manifest is the truth now
+      setStatus($('status'), true, `on air — v${r.v}, ${r.count} items`);
+      load();
+    } catch (e) { setStatus($('status'), false, e.message); }
+  };
+
+  $('shuffle').onclick = async () => {
+    try {
+      const id = curId();
+      const r = await api('/api/admin/shuffle', { channel: id });
+      dropDraft(id);
+      setStatus($('status'), true, `shuffled + on air — v${r.v}`);
+      load();
+    } catch (e) { setStatus($('status'), false, e.message); }
+  };
+
+  // --- ON AIR: per-channel status + episode jump ----------------------------
+  async function renderOnair() {
+    const el = $('onair-list');
+    if (!el) return;
+    let data;
+    try { data = await (await fetch('/api/admin/onair')).json(); } catch (e) { return; }
+    if (!data.channels) return;
+    el.innerHTML = '';
+    data.channels.forEach((c) => {
+      const row = document.createElement('div');
+      row.className = 'onair-ch';
+      const name = `${c.dial} ${escapeHtml(c.name)}`;
+      if (c.offAir) {
+        row.innerHTML = `<span class="onair-name">${name}</span><span class="onair-off">OFF AIR</span>`;
+      } else {
+        row.innerHTML =
+          `<div class="onair-line">` +
+          `<span class="onair-name">${name}</span>` +
+          `<span class="onair-ep">▶ now: <b>${c.current.n}.</b> ${escapeHtml(c.current.title)}</span>` +
+          `<span class="onair-ep dim">next: <b>${c.next.n}.</b> ${escapeHtml(c.next.title)}</span>` +
+          `</div>` +
+          `<div class="onair-btns">` +
+          `<button data-jump="start" data-ch="${escapeHtml(c.channelId)}">⏮ start</button>` +
+          `<button data-jump="prev" data-ch="${escapeHtml(c.channelId)}">◀ prev</button>` +
+          `<button data-jump="next" data-ch="${escapeHtml(c.channelId)}">▶ next</button>` +
+          `<span class="spacer"></span>` +
+          `<button data-shift="30000" data-ch="${escapeHtml(c.channelId)}">FF +30s</button>` +
+          `<button data-shift="300000" data-ch="${escapeHtml(c.channelId)}">FF +5m</button>` +
+          `<button data-shift="-30000" data-ch="${escapeHtml(c.channelId)}">REW −30s</button>` +
+          `<button data-shift="-300000" data-ch="${escapeHtml(c.channelId)}">REW −5m</button>` +
+          `</div>`;
+      }
+      el.appendChild(row);
+    });
+    el.querySelectorAll('button[data-jump]').forEach((b) => {
+      b.onclick = async () => {
+        try {
+          await api('/api/admin/jump', { channel: b.dataset.ch, where: b.dataset.jump });
+          setStatus($('onair-status'), true, `${b.textContent} — channel re-anchored`);
+          renderOnair();
+        } catch (e) { setStatus($('onair-status'), false, e.message); }
+      };
+    });
+    el.querySelectorAll('button[data-shift]').forEach((b) => {
+      b.onclick = async () => {
+        try {
+          const r = await api('/api/admin/shift', { channel: b.dataset.ch, deltaMs: Number(b.dataset.shift) });
+          setStatus($('onair-status'), true, `${b.textContent} → v${r.v}`);
+          renderOnair();
+        } catch (e) { setStatus($('onair-status'), false, e.message); }
+      };
+    });
+  }
+  setInterval(renderOnair, 30000);
+
+  // --- library browser + show composer + build -----------------------------
+  let buildMode = 'roundrobin';
+
+  function fmtSize(b) { if (!b) return ''; if (b < 1e6) return (b / 1024 | 0) + ' KB'; if (b < 1e9) return (b / 1e6).toFixed(1) + ' MB'; return (b / 1e9).toFixed(1) + ' GB'; }
+
+  function renderTree(node, container) {
+    if (node.type === 'dir') {
+      const wrap = document.createElement('div'); wrap.className = 'tree-dir';
+      const head = document.createElement('div'); head.className = 'tree-head';
+      const caret = document.createElement('span'); caret.className = 'caret'; caret.textContent = '▸';
+      const lbl = document.createElement('span'); lbl.className = 'tree-lbl'; lbl.textContent = node.name;
+      const all = document.createElement('button'); all.className = 'mini'; all.textContent = 'select all';
+      head.append(caret, lbl, all);
+      const kids = document.createElement('div'); kids.className = 'tree-kids'; kids.style.display = 'none';
+      (node.children || []).forEach((k) => renderTree(k, kids));
+      wrap.append(head, kids); container.appendChild(wrap);
+      caret.onclick = () => { const open = kids.style.display !== 'none'; kids.style.display = open ? 'none' : 'block'; caret.textContent = open ? '▸' : '▾'; };
+      all.onclick = () => { kids.querySelectorAll('.file-cb').forEach((f) => { f.checked = true; }); updateSel(); };
+    } else {
+      const row = document.createElement('label'); row.className = 'tree-file';
+      const cb = document.createElement('input'); cb.type = 'checkbox'; cb.className = 'file-cb'; cb.dataset.path = node.path;
+      const nm = document.createElement('span'); nm.className = 'tree-name'; nm.textContent = node.name;
+      const sz = document.createElement('span'); sz.className = 'tree-size'; sz.textContent = fmtSize(node.size);
+      row.append(cb, nm, sz); container.appendChild(row);
+    }
+  }
+
+  let libRoot = 'tv';
+  async function loadLib() {
+    const box = $('lib-tree'); box.textContent = 'loading…';
+    const params = [];
+    if (libRoot === 'movies') params.push('root=movies');
+    if ($('lib-mp4') && !$('lib-mp4').checked) params.push('all=1');
+    const url = '/api/admin/media/tree' + (params.length ? '?' + params.join('&') : '');
+    try {
+      const r = await (await fetch(url)).json();
+      $('lib-root').textContent = r.path || r.root;
+      if (!r.tree) { box.textContent = 'no video files under ' + (r.path || r.root) + ' — point CONTENT_DIR / MOVIES_DIR at your library and restart'; return; }
+      box.innerHTML = ''; renderTree(r.tree, box); updateSel();
+    } catch (e) { box.textContent = 'error: ' + e.message; }
+  }
+  if ($('lib-mp4')) $('lib-mp4').onchange = loadLib;
+  function setLibRoot(r) {
+    libRoot = r;
+    $('libroot-tv').classList.toggle('active', r === 'tv');
+    $('libroot-mov').classList.toggle('active', r === 'movies');
+    loadLib();
+  }
+  if ($('libroot-tv')) { $('libroot-tv').onclick = () => setLibRoot('tv'); $('libroot-mov').onclick = () => setLibRoot('movies'); }
+
+  function updateSel() {
+    const n = document.querySelectorAll('#lib-tree .file-cb:checked').length;
+    $('sel-count').textContent = n + ' selected';
+    $('sel-clear').style.display = n ? '' : 'none';
+    document.querySelectorAll('#lib-tree .tree-file').forEach((r) => { const cb = r.querySelector('.file-cb'); if (cb) r.classList.toggle('sel', cb.checked); });
+  }
+  $('lib-tree').addEventListener('change', (ev) => { if (ev.target && ev.target.classList && ev.target.classList.contains('file-cb')) updateSel(); });
+  $('sel-clear').onclick = () => { document.querySelectorAll('#lib-tree .file-cb').forEach((c) => { c.checked = false; }); updateSel(); };
+
+  function curChannel() { return (lineup && lineup.channels || []).find((c) => c.id === $('channel').value); }
+
+  async function refreshShows() {
+    lineup = await (await fetch('/api/admin/lineup')).json();
+    renderShows();
+  }
+
+  function aoDetailsUrl(show) {
+    const src = (show.episodes && show.episodes[0] && show.episodes[0].src) || '';
+    const m = src.match(/^https?:\/\/archive\.org\/download\/([^/]+)/);
+    return m ? 'https://archive.org/details/' + m[1] : null;
+  }
+
+  async function renderShows() {
+    const ch = curChannel();
+    const box = $('shows-list'); box.innerHTML = '';
+    const shows = (ch && ch.shows) || [];
+    const chName = $('show-ch-name'); if (chName) chName.textContent = ch ? ch.name : 'this channel';
+    // batch transcode status for this channel's episodes (flags the ones that can't stream)
+    const allSrcs = [];
+    shows.forEach((s) => (s.episodes || []).forEach((e) => { if (e.src) allSrcs.push(e.src); }));
+    let statusMap = {};
+    if (allSrcs.length) { try { statusMap = await (await fetch('/api/admin/transcode/status?srcs=' + allSrcs.slice(0, 300).join('|'))).json(); } catch (e) { statusMap = {}; } }
+    const flagged = (e) => { const st = statusMap[e.src]; return st && (st.status === 'bad' || st.status === 'too_large'); };
+    if (!shows.length) { box.textContent = 'no shows yet — import one on the left'; return; }
+    shows.forEach((s, i) => {
+      const mins = Math.round(s.episodes.reduce((a, e) => a + (e.duration || 1800), 0) / 60);
+      const longEps = s.episodes.filter((e) => (e.duration || 0) > 1800).length;
+      const badCount = (s.episodes || []).filter(flagged).length;
+      const row = document.createElement('div'); row.className = 'show-row';
+      const url = aoDetailsUrl(s);
+      const nameHtml = url
+        ? `<a href="${url}" target="_blank" rel="noopener"><b>${escapeHtml(s.name)}</b> ↗</a>`
+        : `<b>${escapeHtml(s.name)}</b>`;
+      const longHtml = longEps ? `<span class="ad long" title="Some episodes are very long files — possibly full-season tapes with several episodes clumped in one.">⚠ ${longEps} long</span>` : '';
+      const flagHtml = badCount ? `<span class="tc-flag" title="${badCount} episode(s) can't be streamed — missing, corrupt, or 4K. Fix or remove them, then press re-check.">⚠ ${badCount} flagged</span>` : '';
+      row.innerHTML = `<span style="flex:1">${nameHtml} <span style="opacity:0.55">${s.episodes.length} ep · ~${mins} min</span> ${longHtml} ${flagHtml}</span>`;
+      const mk = (l, f) => { const b = document.createElement('button'); b.textContent = l; b.onclick = f; row.appendChild(b); };
+      mk('↑', () => { if (i > 0) [shows[i - 1], shows[i]] = [shows[i], shows[i - 1]]; renderShows(); });
+      mk('↓', () => { if (i < shows.length - 1) [shows[i + 1], shows[i]] = [shows[i], shows[i + 1]]; renderShows(); });
+      if (badCount) mk('re-check', async () => {
+        try {
+          const r = await api('/api/admin/transcode/recheck', { channel: ch.id, showId: s.id });
+          setStatus($('show-status'), true, r.requeued ? `re-checking ${r.requeued} flagged episode(s)…` : 'nothing to re-check');
+          setTimeout(renderShows, 2000);
+        } catch (e) { setStatus($('show-status'), false, e.message); }
+      });
+      mk('×', async () => { if (!confirm(`remove show “${s.name}”?`)) return; try { await api('/api/admin/channel/shows/remove', { channel: ch.id, showId: s.id }); refreshShows(); } catch (e) { setStatus($('show-status'), false, e.message); } });
+      box.appendChild(row);
+    });
+  }
+
+  $('add-show').onclick = async () => {
+    const ch = curChannel();
+    const files = [...document.querySelectorAll('#lib-tree .file-cb:checked')].map((c) => c.dataset.path);
+    if (!files.length) { setStatus($('show-status'), false, 'tick at least one episode'); return; }
+    const name = $('show-name').value.trim();
+    try {
+      const r = await api('/api/admin/channel/shows/add', { channel: ch.id, name, files, root: libRoot });
+      document.querySelectorAll('#lib-tree .file-cb').forEach((c) => { c.checked = false; });
+      updateSel();
+      $('show-name').value = '';
+      setStatus($('show-status'), true, `added “${r.show.name}” — ${r.show.episodes.length} episodes`);
+      refreshShows();
+    } catch (e) { setStatus($('show-status'), false, e.message); }
+  };
+
+  // archive.org import: scan a link -> list of resolved mp4 episodes -> add as a show
+  let aoEps = null;
+  $('ao-scan').onclick = async () => {
+    const url = $('ao-url').value.trim();
+    if (!url) { setStatus($('ao-status'), false, 'paste an archive.org link first'); return; }
+    aoEps = null;
+    setStatus($('ao-status'), true, 'scanning archive.org…');
+    try {
+      const r = await api('/api/admin/archiveorg', { url, minDur: parseInt($('ao-min').value, 10) || 0, maxDur: parseInt($('ao-max').value, 10) || 0 });
+      aoEps = r.episodes;
+      const first = r.episodes.slice(0, 3).map((e) => e.title).join(' · ');
+      setStatus($('ao-status'), true, `✓ ${r.count} episodes${r.dropped ? ` (${r.dropped} filtered by min/max)` : ''} — ${first}${r.count > 3 ? ' …' : ''}`);
+      if (!$('show-name').value) $('show-name').value = r.episodes[0].title.split(/ s\d+ e\d+/i)[0].replace(/\s*\-\s*.*$/, '').trim();
+    } catch (e) { setStatus($('ao-status'), false, e.message); }
+  };
+  $('add-ao').onclick = async () => {
+    const ch = curChannel();
+    if (!aoEps) { setStatus($('show-status'), false, 'scan the link first'); return; }
+    const name = $('show-name').value.trim();
+    try {
+      const r = await api('/api/admin/channel/shows/add', { channel: ch.id, name, episodes: aoEps });
+      aoEps = null; $('ao-url').value = ''; $('show-name').value = ''; $('ao-status').className = 'status'; $('ao-status').textContent = '';
+      setStatus($('show-status'), true, `added “${r.show.name}” — ${r.show.episodes.length} episodes from archive.org`);
+      refreshShows();
+    } catch (e) { setStatus($('show-status'), false, e.message); }
+  };
+
+  $('rescan-all').onclick = async () => {
+    const ch = curChannel();
+    if (!ch || !(ch.shows || []).length) { setStatus($('rescan-status'), false, 'no shows on this channel to rescan'); return; }
+    if (!confirm(`Re-scan every show on “${ch.name}”?\n\nEach show's episode list is replaced with what its folder (or archive.org item) contains right now — new episodes appear, deleted ones drop off.`)) return;
+    try {
+      setStatus($('rescan-status'), true, 're-scanning…');
+      const r = await api('/api/admin/channel/rescan', { channel: ch.id });
+      const per = (r.shows || []).map((s) => `${s.name} ${s.before}→${s.after}${s.error ? ' (' + s.error + ')' : ''}`).join('  ·  ');
+      setStatus($('rescan-status'), !r.failed, `done — ${per}`);
+      refreshShows();
+    } catch (e) { setStatus($('rescan-status'), false, e.message); }
+  };
+
+  // build controls
+  function setMode(m) { buildMode = m; $('mode-rr').classList.toggle('active', m === 'roundrobin'); $('mode-smart').classList.toggle('active', m === 'smartshuffle'); $('mode-seq').classList.toggle('active', m === 'sequential'); }
+  $('mode-rr').onclick = () => setMode('roundrobin');
+  $('mode-smart').onclick = () => setMode('smartshuffle');
+  $('mode-seq').onclick = () => setMode('sequential');
+  $('c-every').oninput = () => { $('every-val').textContent = $('c-every').value; };
+  document.querySelectorAll('[data-rlen]').forEach((b) => { b.onclick = () => { $('c-len').value = b.dataset.rlen; document.querySelectorAll('[data-rlen]').forEach((x) => x.classList.toggle('on', x === b)); }; });
+
+  $('build-pub').onclick = async () => {
+    const ch = curChannel();
+    if (!ch || !(ch.shows || []).length) { setStatus($('build-status'), false, 'add a show first'); return; }
+    try {
+      setStatus($('build-status'), true, 'building…');
+      const r = await api('/api/admin/channel/build', {
+        channel: ch.id, mode: buildMode,
+        commercialEvery: parseInt($('c-every').value, 10) || 0,
+        commercialDuration: parseInt($('c-len').value, 10) || 15,
+        order: (ch.shows || []).map((s) => s.id),
+        marathon: { on: $('mar-on').checked, block: parseInt($('mar-block').value, 10) || 3, count: parseInt($('mar-count').value, 10) || 1 }
+      });
+      setStatus($('build-status'), true, `on air — ${r.episodes} episodes, ${r.commercials} commercials (${r.mode})`);
+      dropDraft(ch.id);
+      load();
+    } catch (e) { setStatus($('build-status'), false, e.message); }
+  };
+
+  // --- admin auth gate (ADMIN_PASSWORD env) ---
+  (async () => {
+    let st;
+    try { st = await (await fetch('/api/admin/state')).json(); } catch (e) { return; }
+    if (!st.authEnabled) {
+      const w = document.createElement('div');
+      w.className = 'status err';
+      w.textContent = '⚠ ADMIN_PASSWORD is not set — this console is open to anyone who knows the URL';
+      $('auth-warn').appendChild(w);
+      return;
+    }
+    if (st.authed) { $('admin-logout').classList.remove('hidden'); return; }
+    $('admin-console').classList.add('hidden');
+    $('auth-gate').classList.remove('hidden');
+    $('auth-pw').focus();
+  })();
+  $('auth-pw-go').onclick = async () => {
+    try {
+      const r = await fetch('/api/admin/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ password: $('auth-pw').value }) });
+      if (r.ok) { location.reload(); return; }
+      const j = await r.json().catch(() => ({}));
+      setStatus($('auth-err'), false, j.error || 'login failed');
+    } catch (e) { setStatus($('auth-err'), false, 'offline'); }
+  };
+  $('auth-pw').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('auth-pw-go').click(); });
+  $('admin-logout').onclick = async () => { try { await fetch('/api/admin/logout', { method: 'POST' }); } catch (e) { /* ignore */ } location.reload(); };
+
+  // --- site access (optional password on the main site) ---
+  function paintSitePwState(s) {
+    const el = $('site-pw-state');
+    el.textContent = s.sitePassword ? 'main site is password protected' : 'main site is open — no password';
+    el.className = 'status ' + (s.sitePassword ? 'ok' : '');
+  }
+  async function loadSitePw() { try { paintSitePwState(await (await fetch('/api/admin/settings')).json()); } catch (e) { /* gated or offline */ } }
+  $('site-pw-save').onclick = async () => {
+    try {
+      const r = await api('/api/admin/settings', { sitePassword: $('site-pw').value.trim() });
+      $('site-pw').value = '';
+      paintSitePwState(r.settings);
+      setStatus($('site-pw-status'), true, 'saved — takes effect immediately');
+    } catch (e) { setStatus($('site-pw-status'), false, e.message); }
+  };
+  loadSitePw();
+
+  // --- the console, in tabs ---
+  let tcTimer = null;
+  const TABS = ['channels', 'onair', 'transcode', 'flags', 'site', 'members', 'backup', 'info'];
+  function showTab(name) {
+    if (!TABS.includes(name)) name = 'site';
+    document.querySelectorAll('#tabs .tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
+    TABS.forEach((t) => $('tab-' + t).classList.toggle('hidden', t !== name));
+    if (name === 'transcode') { loadTcLive(); if (!tcTimer) tcTimer = setInterval(loadTcLive, 5000); }
+    else if (tcTimer) { clearInterval(tcTimer); tcTimer = null; }
+    if (name === 'onair') renderOnair();
+    if (name === 'flags') { loadFlags(); loadRemovedLog(); }
+    if (name === 'members') { loadUsers(); loadBlocked(); }
+    if (name === 'info') loadInfo();
+    if (name === 'channels' && lineup) { renderChannelList(); loadFlagMap().then(renderChannelContent); renderChannelContent(); }
+  }
+  document.querySelectorAll('#tabs .tab').forEach((b) => { b.onclick = () => showTab(b.dataset.tab); });
+
+  // --- what's on the selected channel: show by show, episode by episode -----
+  // The lineup is what actually goes on air, so this is a view of the shows and
+  // their files, not of the published lineup. Single files can be taken out here.
+  const openShows = new Set();
+  const allEps = new Set(); // shows whose whole episode list is drawn
+  const flagMap = new Map(); // src -> the flag on it, for the files that won't play
+  async function loadFlagMap() {
+    try {
+      const d = await (await fetch('/api/admin/flags')).json();
+      flagMap.clear();
+      for (const f of d.list || []) flagMap.set(f.src, f);
+    } catch (e) { /* not signed in, or offline */ }
+  }
+  function renderChannelContent() {
+    const box = $('chan-content');
+    if (!box) return;
+    box.innerHTML = '';
+    const ch = curChannel();
+    const count = $('content-count');
+    if (count) count.textContent = '';
+    if (!ch) { box.innerHTML = '<span style="opacity:0.55;font-size:0.8rem">pick a channel on the left</span>'; return; }
+    const shows = ch.shows || [];
+    if (count) count.textContent = shows.length ? `(${shows.length} show${shows.length === 1 ? '' : 's'})` : '';
+    if (!shows.length) { box.innerHTML = '<span style="opacity:0.55;font-size:0.8rem">no shows on this channel yet</span>'; return; }
+    shows.forEach((show) => {
+      const row = document.createElement('div'); row.className = 'item-row';
+      const open = openShows.has(show.id);
+      const caret = document.createElement('button');
+      caret.textContent = open ? '▾' : '▸';
+      caret.title = open ? 'close the show' : 'open the show';
+      caret.onclick = () => { if (open) openShows.delete(show.id); else openShows.add(show.id); renderChannelContent(); };
+      row.appendChild(caret);
+      const name = document.createElement('span');
+      name.style.flex = '1';
+      name.textContent = show.name || 'show';
+      row.appendChild(name);
+      const eps = show.episodes || [];
+      const n = document.createElement('span'); n.className = 'ver'; n.style.opacity = '0.55';
+      n.textContent = eps.length + ' eps';
+      row.appendChild(n);
+      const bad = eps.filter((e) => flagMap.has(e.src)).length;
+      if (bad) { const b = document.createElement('span'); b.className = 'tc-flag'; b.textContent = bad + ' flagged'; row.appendChild(b); }
+      box.appendChild(row);
+      if (!open) return;
+      const epsAll = eps;
+      const shown = allEps.has(show.id) ? epsAll : epsAll.slice(0, 50);
+      shown.forEach((ep) => {
+        const er = document.createElement('div'); er.className = 'item-row';
+        er.style.paddingLeft = '1.4rem';
+        const st = flagMap.get(ep.src);
+        const flag = !!st;
+        const t = document.createElement('span');
+        t.style.cssText = 'flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+        t.textContent = ep.title || String(ep.src || '').split('/').pop();
+        t.title = ep.src;
+        er.appendChild(t);
+        if (flag) {
+          const b = document.createElement('span'); b.className = 'tc-flag';
+          b.textContent = st.status === 'bad' ? 'broken' : 'too big';
+          b.title = st.err || '';
+          er.appendChild(b);
+        }
+        const dur = document.createElement('span'); dur.className = 'ver'; dur.style.opacity = '0.55';
+        dur.textContent = ep.duration ? Math.round(ep.duration) + 's' : '';
+        er.appendChild(dur);
+        const rm = document.createElement('button'); rm.textContent = '×';
+        rm.title = 'take this file out of the show';
+        rm.onclick = async () => {
+          if (!confirm(`remove “${ep.title || ep.src}” from “${show.name}”?`)) return;
+          try {
+            await api('/api/admin/channel/shows/episode/remove', { channel: ch.id, showId: show.id, src: ep.src });
+            setStatus($('ch-status'), true, 'file removed — build or publish the channel to put it on air');
+            await load();
+          } catch (e) { setStatus($('ch-status'), false, e.message); }
+        };
+        er.appendChild(rm);
+        box.appendChild(er);
+      });
+      if (epsAll.length > shown.length) {
+        const more = document.createElement('button');
+        more.className = 'mini';
+        more.textContent = `…and ${epsAll.length - shown.length} more files — show all`;
+        more.onclick = () => { allEps.add(show.id); renderChannelContent(); };
+        box.appendChild(more);
+      }
+    });
+  }
+
+  // --- the flags: files that won't play, and the ways to fix them ------------
+  // The badge on the tab says whether anything is outstanding: a red triangle
+  // when there is, a green tick when there isn't.
+  const BADGE_BAD = '<svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.4 15.2 14.4H0.8z" fill="#ff5f5f" stroke="#7f1f1f" stroke-width="1"/><rect x="7.1" y="5.4" width="1.9" height="5.2" rx="0.9" fill="#1a1030"/><circle cx="8" cy="12.3" r="1.2" fill="#1a1030"/></svg>';
+  const BADGE_OK = '<svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="#2e7d4f" stroke="#14532d" stroke-width="1"/><path d="M4.6 8.3 7 10.7 11.6 5.6" fill="none" stroke="#e6ffe9" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  function setBadge(n) {
+    const b = $('flags-badge');
+    if (!b) return;
+    b.innerHTML = n ? BADGE_BAD : BADGE_OK;
+    b.title = n ? `${n} file${n === 1 ? '' : 's'} won't play` : 'nothing is flagged';
+  }
+  async function loadFlags() {
+    const box = $('flags-list');
+    if (!box) return;
+    let d;
+    try { d = await (await fetch('/api/admin/flags')).json(); }
+    catch (e) { box.innerHTML = '<span class="status err">could not read the flags</span>'; return; }
+    const list = d.list || [];
+    flagMap.clear();
+    for (const f of list) flagMap.set(f.src, f);
+    setBadge(d.total || 0);
+    setStatus($('flags-status'), true, list.length ? `${d.total} flagged file${d.total === 1 ? '' : 's'}` : 'nothing is flagged — every file plays');
+    box.innerHTML = '';
+    if (!list.length) { box.innerHTML = '<span style="opacity:0.55;font-size:0.8rem">no flagged files</span>'; }
+    list.forEach((f) => {
+      const row = document.createElement('div'); row.className = 'item-row';
+      const who = document.createElement('span');
+      who.style.cssText = 'flex:0 0 26%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+      who.textContent = `${f.dial} ${f.channelName} — ${f.showName}`;
+      who.title = `${f.channelName} / ${f.showName}`;
+      row.appendChild(who);
+      const what = document.createElement('span');
+      what.style.cssText = 'flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+      what.textContent = f.title || String(f.src || '').split('/').pop();
+      what.title = f.src;
+      row.appendChild(what);
+      const err = document.createElement('span');
+      err.style.cssText = 'flex:0 0 22%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.75rem;opacity:0.75';
+      err.textContent = f.err || (f.status === 'too_large' ? 'too tall to convert' : '');
+      err.title = f.err || '';
+      row.appendChild(err);
+      const st = document.createElement('span'); st.className = 'tc-flag';
+      st.textContent = f.status === 'bad' ? 'broken' : 'too big';
+      row.appendChild(st);
+      const mk = (label, fn) => { const b = document.createElement('button'); b.textContent = label; b.onclick = fn; row.appendChild(b); };
+      mk('fix', async () => {
+        if (!confirm(`fix “${f.title || f.src}”?\n\nit comes out of the queue, out of the cache and out of the show.`)) return;
+        try {
+          const r = await api('/api/admin/flags/purge', { src: f.src });
+          setStatus($('flags-status'), true, `fixed — ${r.episodes} file${r.episodes === 1 ? '' : 's'} taken out`);
+          loadFlags(); loadRemovedLog(); load();
+        } catch (e) { setStatus($('flags-status'), false, e.message); }
+      });
+      mk('replace', () => flagReplace(f, row));
+      mk('rescan', async () => {
+        setStatus($('flags-status'), true, 'measuring it again…');
+        try {
+          const r = await api('/api/admin/episode/rescan', { channel: f.channel, showId: f.showId, src: f.src });
+          setStatus($('flags-status'), r.ok, r.ok ? `measured again — ${Math.round(r.duration)}s` : 'still broken: ' + r.error);
+          loadFlags(); load();
+        } catch (e) { setStatus($('flags-status'), false, e.message); }
+      });
+      box.appendChild(row);
+    });
+  }
+  // what has been taken out, and why it went
+  async function loadRemovedLog() {
+    const box = $('flags-log');
+    if (!box) return;
+    let d;
+    try { d = await (await fetch('/api/admin/flags/removed')).json(); }
+    catch (e) { return; }
+    const log = d.log || [];
+    box.innerHTML = '';
+    if (!log.length) { box.innerHTML = '<span style="opacity:0.55;font-size:0.8rem">nothing has been removed yet</span>'; return; }
+    log.forEach((r) => {
+      const row = document.createElement('div'); row.className = 'item-row';
+      const when = document.createElement('span');
+      when.style.cssText = 'flex:0 0 12%;font-size:0.75rem;opacity:0.7';
+      when.textContent = new Date(r.at).toLocaleString();
+      row.appendChild(when);
+      const what = document.createElement('span');
+      what.style.cssText = 'flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+      what.textContent = String(r.src || '').split('/').pop();
+      what.title = r.src;
+      row.appendChild(what);
+      const why = document.createElement('span');
+      why.style.cssText = 'flex:0 0 30%;font-size:0.75rem;opacity:0.85';
+      why.textContent = r.reason || r.err || 'removed';
+      why.title = (r.from || []).map((f) => `${f.channel} / ${f.show}`).join(', ');
+      row.appendChild(why);
+      box.appendChild(row);
+    });
+  }
+  $('flags-clean').onclick = async () => {
+    if (!confirm('clean up every file the cache has given up on?\n\nthey come out of the queue, out of the cache and out of the shows that carry them. the reason for each is kept in the log below.')) return;
+    try {
+      const r = await api('/api/admin/flags/purge', { all: true });
+      setStatus($('flags-status'), true, `cleaned up — ${r.removed} file${r.removed === 1 ? '' : 's'} out of the queue, ${r.episodes} out of the shows`);
+      loadFlags(); loadRemovedLog(); load();
+    } catch (e) { setStatus($('flags-status'), false, e.message); }
+  };
+  // "replace" points a broken episode at another file from the same show
+  function flagReplace(f, row) {
+    const old = row.nextElementSibling;
+    if (old && old.classList.contains('row-replace')) { old.remove(); return; }
+    const ch = (lineup.channels || []).find((c) => c.id === f.channel);
+    const show = ch && (ch.shows || []).find((s) => s.id === f.showId);
+    const others = ((show && show.episodes) || []).filter((e) => e.src !== f.src);
+    const form = document.createElement('div');
+    form.className = 'item-row row-replace';
+    form.style.paddingLeft = '1rem';
+    const sel = document.createElement('select');
+    sel.style.flex = '1';
+    const first = document.createElement('option');
+    first.value = ''; first.textContent = others.length ? '— another file from this show —' : '— this show has no other files —';
+    sel.appendChild(first);
+    others.forEach((e) => {
+      const o = document.createElement('option');
+      o.value = e.src;
+      o.textContent = e.title || String(e.src || '').split('/').pop();
+      sel.appendChild(o);
+    });
+    const use = document.createElement('button'); use.textContent = 'use this file';
+    use.onclick = async () => {
+      if (!sel.value) return;
+      try {
+        await api('/api/admin/channel/shows/episode/replace', { channel: f.channel, showId: f.showId, src: f.src, newSrc: sel.value });
+        setStatus($('flags-status'), true, 'replaced — build or publish the channel to put it on air');
+        form.remove();
+        loadFlags(); load();
+      } catch (e) { setStatus($('flags-status'), false, e.message); }
+    };
+    const x = document.createElement('button'); x.textContent = '×';
+    x.onclick = () => form.remove();
+    form.appendChild(sel); form.appendChild(use); form.appendChild(x);
+    row.after(form);
+  }
+  $('flags-refresh').onclick = () => loadFlags();
+
+  // --- info: what this box is, what it is holding, and where it came from ---
+  async function loadInfo() {
+    const box = $('info-box');
+    if (!box) return;
+    let d;
+    try { d = await (await fetch('/api/admin/info')).json(); }
+    catch (e) { box.innerHTML = '<span class="status err">could not read the box details</span>'; return; }
+    const gb = (b) => (b / 1073741824).toFixed(1) + ' GB';
+    const mb = (b) => (b / 1048576).toFixed(0) + ' MB';
+    const row = (label, value) => `<div class="item-row"><span style="flex:0 0 40%;opacity:0.8">${label}</span><span style="flex:1">${value}</span></div>`;
+    let html = '';
+    html += row('version', `${d.name} ${d.version} · node ${d.node} · ${d.platform}`);
+    html += row('uptime', d.uptime);
+    html += row('channels', `${d.channels} channels · ${d.shows} shows · ${d.episodes} episodes · ${d.versions} published versions`);
+    html += row('memory', `${mb(d.rss)} in use by the app · ${gb(d.memUsed)} of ${gb(d.memTotal)} used on the machine`);
+    for (const m of d.mounts || []) {
+      html += row(m.label, `${m.path} — ${gb(m.used)} of ${gb(m.total)} used, ${gb(m.free)} free`);
+    }
+    html += '<div class="item-row"><span style="flex:0 0 40%;opacity:0.8">links</span><span style="flex:1">'
+      + `<a href="https://github.com/200plat/dialarr" target="_blank" rel="noopener">source on GitHub</a>`
+      + (d.discordUrl ? ` · <a href="${escapeHtml(d.discordUrl)}" target="_blank" rel="noopener">discord</a>` : ' · <span style="opacity:0.6">discord — coming soon</span>')
+      + '</span></div>';
+    html += '<div class="item-row"><span style="flex:0 0 40%;opacity:0.8">thank you</span><span style="flex:1">for using it, for the tapes, and for the people who watch along.</span></div>';
+    box.innerHTML = html;
+  }
+
+  // --- building a channel: by hand, or from the library ---
+  function chanMode(m) {
+    const lib = m === 'lib';
+    $('sec-content').classList.toggle('hidden', lib);
+    $('sec-commercial').classList.toggle('hidden', lib);
+    $('sec-lib').classList.toggle('hidden', !lib);
+    $('mode-add').classList.toggle('active', !lib);
+    $('mode-lib').classList.toggle('active', lib);
+  }
+  $('mode-add').onclick = () => chanMode('add');
+  $('mode-lib').onclick = () => chanMode('lib');
+  chanMode('lib');
+
+  // --- the transcode cache, live ---
+  async function loadTcLive() {
+    const box = $('tc-cache-now');
+    if (!box) return;
+    let d;
+    try { d = await (await fetch('/api/admin/transcodes')).json(); }
+    catch (e) { box.innerHTML = '<span class="status err">could not read the cache</span>'; return; }
+    const c = d.counts || {};
+    const gb = (b) => (b / 1073741824).toFixed(2) + ' GB';
+    const pct = d.cacheBytes ? Math.min(100, Math.round((d.diskBytes / d.cacheBytes) * 100)) : 0;
+    const stat = (label, n) => `<span>${n} ${label}</span>`;
+    box.innerHTML = '<div class="tc-stat">' +
+      stat('ready', c.ready || 0) + stat('converting', c.working || 0) + stat('pending', c.pending || 0) +
+      stat('broken', c.bad || 0) + stat('too big', c.too_large || 0) + stat('queued', d.queue || 0) +
+      stat('slots busy', d.active || 0) + stat('tracked', d.total || 0) +
+      '</div>' +
+      `<div class="tc-bar"><i style="width:${pct}%"></i></div>` +
+      `<div style="opacity:0.7;font-size:0.8rem">${gb(d.diskBytes)} on disk of a ${gb(d.cacheBytes)} limit (${pct}%) — ${gb(d.bytes)} of that is converted files</div>` +
+      `<div style="opacity:0.85;font-size:0.8rem;margin-top:0.35rem">` +
+      `${d.wanted || 0} file${(d.wanted || 0) === 1 ? '' : 's'} on air or about to be (${gb(d.wantedBytes || 0)}) · ` +
+      `${d.spare || 0} idle (${gb(d.spareBytes || 0)})` +
+      (d.orphanBytes ? ` · ${d.orphanN || 0} orphan${(d.orphanN || 0) === 1 ? '' : 's'} on disk (${gb(d.orphanBytes)})` : '') +
+      (d.partBytes ? ` · ${gb(d.partBytes)} being written` : '') +
+      '</div>' +
+      `<div style="opacity:0.6;font-size:0.78rem;margin-top:0.2rem">the idle ones are cached files that have already played. eviction only trims once the cache is over its limit, so they sit there until then — "drop what's not needed" throws them out now.</div>`;
+    const list = document.createElement('div');
+    (d.list || []).forEach((i) => {
+      const row = document.createElement('div'); row.className = 'item-row';
+      const name = document.createElement('span');
+      name.style.cssText = 'flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+      name.textContent = String(i.src || '').split('/').pop();
+      name.title = i.src || '';
+      row.appendChild(name);
+      const st = document.createElement('span');
+      st.textContent = i.status || 'unknown';
+      st.style.cssText = 'font-size:0.72rem;letter-spacing:0.05em';
+      if (i.status === 'ready') st.style.color = '#8ee6a0';
+      else if (i.status === 'bad' || i.status === 'too_large') st.style.color = '#ff8787';
+      row.appendChild(st);
+      const sz = document.createElement('span');
+      sz.style.cssText = 'opacity:0.6;font-size:0.75rem';
+      sz.textContent = fmtSize(i.bytes);
+      row.appendChild(sz);
+      if (i.height) {
+        const h = document.createElement('span');
+        h.style.cssText = 'opacity:0.6;font-size:0.75rem';
+        h.textContent = i.height + 'p source';
+        h.title = 'the height of the source file, not of the converted output';
+        row.appendChild(h);
+      }
+      if (i.err) {
+        const e2 = document.createElement('span');
+        e2.className = 'tc-err';
+        e2.textContent = String(i.err).slice(0, 120);
+        row.appendChild(e2);
+      }
+      list.appendChild(row);
+    });
+    box.appendChild(list);
+  }
+  const prune = async (all, what) => {
+    if (!confirm(all ? 'empty the whole cache?\n\nevery converted file goes, and the ones on air have to be converted again.' : `drop the cached files nobody is waiting for?\n\nthe ones on air or about to air stay.`)) return;
+    try {
+      const r = await api('/api/admin/transcodes/prune', { all: !!all });
+      setStatus($('tc-prune-status'), true, `${what} — ${r.removed} file${r.removed === 1 ? '' : 's'}, ${(r.freed / 1073741824).toFixed(2)} GB back`);
+      loadTcLive();
+    } catch (e) { setStatus($('tc-prune-status'), false, e.message); }
+  };
+  $('tc-prune').onclick = () => prune(false, 'dropped the idle ones');
+  $('tc-prune-all').onclick = () => prune(true, 'emptied the cache');
+
+  loadLib();
+  load();
+  loadSite();
+  loadFx();
+  loadTc();
+  loadUsers();
+  initTheme();
+  // the badge on the flags tab has to be right even when the tab isn't open
+  const badgeTick = async () => {
+    try { const d = await (await fetch('/api/admin/flags')).json(); setBadge(d.total || 0); }
+    catch (e) { /* locked or offline */ }
+  };
+  badgeTick();
+  setInterval(badgeTick, 60000);
+  // a tab in the address bar opens on that tab (#transcode, #channels, …)
+  if (TABS.includes(location.hash.slice(1))) showTab(location.hash.slice(1));
+  </script>
+</body>
+</html>
