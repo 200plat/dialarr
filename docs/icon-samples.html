@@ -1,0 +1,241 @@
+<title>Dialarr Icon Options</title>
+<style>
+  :root {
+    --bg: #12063a;
+    --panel: #1c0a57;
+    --edge: #3a1f8c;
+    --orange: #ff6f00;
+    --amber: #ffc04d;
+    --cream: #f5f0ff;
+    --dim: #a99fd0;
+    --ink: #1a1030;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--cream);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    line-height: 1.55;
+    padding: 0 16px 64px;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; }
+  header { padding: 48px 0 8px; }
+  h1 {
+    font-size: clamp(1.7rem, 5vw, 2.6rem);
+    letter-spacing: -0.02em;
+    margin: 0 0 0.5rem;
+  }
+  h1 span { color: var(--orange); }
+  .lede { color: var(--dim); max-width: 60ch; margin: 0 0 2.4rem; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 1rem;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--edge);
+    border-radius: 14px;
+    padding: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    min-width: 0;
+  }
+  .art {
+    background: #0b0530;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    padding: 1.4rem;
+  }
+  .art svg { width: 128px; height: 128px; display: block; }
+  .card h2 { font-size: 1rem; margin: 0; letter-spacing: 0.08em; }
+  .card p { margin: 0; color: var(--dim); font-size: 0.86rem; }
+  .sizes { display: flex; align-items: flex-end; gap: 14px; border-top: 1px solid var(--edge); padding-top: 0.8rem; }
+  .sizes figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+  .sizes figcaption { font-size: 0.66rem; color: var(--dim); }
+  .sizes svg { display: block; }
+  .on-light {
+    background: #efe9ff;
+    border-radius: 8px;
+    padding: 5px;
+    display: grid;
+    place-items: center;
+  }
+  h2.section {
+    font-size: 0.74rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin: 3rem 0 1rem;
+    font-weight: 600;
+  }
+  .strip {
+    background: var(--panel);
+    border: 1px solid var(--edge);
+    border-radius: 14px;
+    padding: 1.2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.1rem;
+    align-items: center;
+  }
+  .strip .cell { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
+  .strip .cell span { font-size: 0.66rem; color: var(--dim); }
+  .note { color: var(--dim); font-size: 0.84rem; margin-top: 1rem; max-width: 70ch; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Dialarr <span>icons</span></h1>
+    <p class="lede">
+      Five directions for the app icon, in the colours the console already wears —
+      deep purple field, orange border, amber signal. Each one is drawn as an SVG so
+      it stays sharp at 16 pixels in a browser tab and at 512 in a store listing.
+      Nothing here is committed yet.
+    </p>
+  </header>
+
+  <div class="grid">
+    <div class="card">
+      <div class="art">
+        <svg viewBox="0 0 64 64" role="img" aria-label="the dial">
+          <rect width="64" height="64" rx="14" fill="#12063a"/>
+          <circle cx="32" cy="32" r="20" fill="none" stroke="#ff6f00" stroke-width="4"/>
+          <g stroke="#f5f0ff" stroke-width="3" stroke-linecap="round" opacity="0.85">
+            <path d="M32 8 v5"/><path d="M56 32 h-5"/><path d="M32 56 v-5"/><path d="M8 32 h5"/>
+          </g>
+          <path d="M32 32 L44 21" stroke="#ffc04d" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="32" cy="32" r="6" fill="#ff6f00"/>
+        </svg>
+      </div>
+      <h2>1 — THE DIAL</h2>
+      <p>The name is the dial, so the dial is the mark: a knob with a pointer and four ticks. The simplest of the five, and the one that survives being 16 pixels wide.</p>
+      <div class="sizes">
+        <figure><svg width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12063a"/><circle cx="32" cy="32" r="20" fill="none" stroke="#ff6f00" stroke-width="4"/><path d="M32 32 L44 21" stroke="#ffc04d" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="32" r="6" fill="#ff6f00"/></svg><figcaption>64</figcaption></figure>
+        <figure><svg width="32" height="32" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12063a"/><circle cx="32" cy="32" r="20" fill="none" stroke="#ff6f00" stroke-width="4"/><path d="M32 32 L44 21" stroke="#ffc04d" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="32" r="6" fill="#ff6f00"/></svg><figcaption>32</figcaption></figure>
+        <figure><svg width="16" height="16" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12063a"/><circle cx="32" cy="32" r="20" fill="none" stroke="#ff6f00" stroke-width="4"/><path d="M32 32 L44 21" stroke="#ffc04d" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="32" r="6" fill="#ff6f00"/></svg><figcaption>16</figcaption></figure>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="art">
+        <svg viewBox="0 0 64 64" role="img" aria-label="the crt">
+          <rect width="64" height="64" rx="14" fill="#12063a"/>
+          <rect x="9" y="15" width="46" height="31" rx="8" fill="none" stroke="#ff6f00" stroke-width="4"/>
+          <g stroke="#ffc04d" stroke-width="2.5" opacity="0.8" stroke-linecap="round">
+            <path d="M17 24 H47"/><path d="M17 31 H47"/><path d="M17 38 H47"/>
+          </g>
+          <path d="M21 53 H43" stroke="#ff6f00" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h2>2 — THE SET</h2>
+      <p>A television with the picture on: a rounded screen, three scanlines, a stand. Reads as "TV" before it reads as anything else, which is the point.</p>
+      <div class="sizes">
+        <figure><svg width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12063a"/><rect x="9" y="15" width="46" height="31" rx="8" fill="none" stroke="#ff6f00" stroke-width="4"/><g stroke="#ffc04d" stroke-width="2.5" opacity="0.8" stroke-linecap="round"><path d="M17 24 H47"/><path d="M17 31 H47"/><path d="M17 38 H47"/></g><path d="M21 53 H43" stroke="#ff6f00" stroke-width="4" stroke-linecap="round"/></svg><figcaption>64</figcaption></figure>
+        <figure><svg width="32" height="32" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12063a"/><rect x="9" y="15" width="46" height="31" rx="8" fill="none" stroke="#ff6f00" stroke-width="4"/><g stroke="#ffc04d" stroke-width="3" opacity="0.9" stroke-linecap="round"><path d="M17 25 H47"/><path d="M17 36 H47"/></g><path d="M21 53 H43" stroke="#ff6f00" stroke-width="4" stroke-linecap="round"/></svg><figcaption>32</figcaption></figure>
+        <figure><svg width="16" height="16" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12063a"/><rect x="9" y="15" width="46" height="31" rx="8" fill="none" stroke="#ff6f00" stroke-width="5"/><g stroke="#ffc04d" stroke-width="4" opacity="0.9" stroke-linecap="round"><path d="M17 25 H47"/><path d="M17 36 H47"/></g></svg><figcaption>16</figcaption></figure>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="art">
+        <svg viewBox="0 0 64 64" role="img" aria-label="the wave">
+          <rect width="64" height="64" rx="14" fill="#12063a"/>
+          <path d="M5 32 q7 -17 14 0 t14 0 t14 0 t14 0" fill="none" stroke="#ff6f00" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="47" cy="32" r="4.5" fill="#ffc04d"/>
+        </svg>
+      </div>
+      <h2>3 — THE SIGNAL</h2>
+      <p>A tuning wave across the middle, with the lock point marked. It is the same squiggle as the tuning screen on the TV page, so the icon and the product say the same thing.</p>
+      <div class="sizes">
+        <figure><svg width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12063a"/><path d="M5 32 q7 -17 14 0 t14 0 t14 0 t14 0" fill="none" stroke="#ff6f00" stroke-width="5" stroke-linecap="round"/><circle cx="47" cy="32" r="4.5" fill="#ffc04d"/></svg><figcaption>64</figcaption></figure>
+        <figure><svg width="32" height="32" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12063a"/><path d="M5 32 q7 -17 14 0 t14 0 t14 0 t14 0" fill="none" stroke="#ff6f00" stroke-width="6" stroke-linecap="round"/><circle cx="47" cy="32" r="5" fill="#ffc04d"/></svg><figcaption>32</figcaption></figure>
+        <figure><svg width="16" height="16" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12063a"/><path d="M5 32 q7 -17 14 0 t14 0 t14 0 t14 0" fill="none" stroke="#ff6f00" stroke-width="8" stroke-linecap="round"/></svg><figcaption>16</figcaption></figure>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="art">
+        <svg viewBox="0 0 64 64" role="img" aria-label="the guide">
+          <rect width="64" height="64" rx="14" fill="#12063a"/>
+          <g fill="#ff6f00">
+            <rect x="9" y="9" width="12" height="12" rx="2"/>
+            <rect x="26" y="9" width="12" height="12" rx="2"/>
+            <rect x="43" y="9" width="12" height="12" rx="2"/>
+            <rect x="9" y="26" width="12" height="12" rx="2"/>
+            <rect x="26" y="26" width="12" height="12" rx="2"/>
+            <rect x="43" y="26" width="12" height="12" rx="2"/>
+            <rect x="9" y="43" width="12" height="12" rx="2"/>
+            <rect x="26" y="43" width="12" height="12" rx="2"/>
+            <rect x="43" y="43" width="12" height="12" rx="2"/>
+          </g>
+          <rect x="26" y="9" width="12" height="12" rx="2" fill="#ffc04d"/>
+          <rect x="9" y="9" width="46" height="12" rx="2" fill="none" stroke="#f5f0ff" stroke-width="2.5"/>
+        </svg>
+      </div>
+      <h2>4 — THE GUIDE</h2>
+      <p>The programme guide as a mark: nine blocks, one row picked out in amber and underlined. It is the grid every viewer looks at, and the one piece of the TV page that is purely Dialarr.</p>
+      <div class="sizes">
+        <figure><svg width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12063a"/><g fill="#ff6f00"><rect x="9" y="9" width="12" height="12" rx="2"/><rect x="26" y="9" width="12" height="12" rx="2"/><rect x="43" y="9" width="12" height="12" rx="2"/><rect x="9" y="26" width="12" height="12" rx="2"/><rect x="26" y="26" width="12" height="12" rx="2"/><rect x="43" y="26" width="12" height="12" rx="2"/><rect x="9" y="43" width="12" height="12" rx="2"/><rect x="26" y="43" width="12" height="12" rx="2"/><rect x="43" y="43" width="12" height="12" rx="2"/></g><rect x="26" y="9" width="12" height="12" rx="2" fill="#ffc04d"/><rect x="9" y="9" width="46" height="12" rx="2" fill="none" stroke="#f5f0ff" stroke-width="2.5"/></svg><figcaption>64</figcaption></figure>
+        <figure><svg width="32" height="32" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12063a"/><g fill="#ff6f00"><rect x="9" y="9" width="12" height="12" rx="2"/><rect x="26" y="9" width="12" height="12" rx="2"/><rect x="43" y="9" width="12" height="12" rx="2"/><rect x="9" y="26" width="12" height="12" rx="2"/><rect x="26" y="26" width="12" height="12" rx="2"/><rect x="43" y="26" width="12" height="12" rx="2"/><rect x="9" y="43" width="12" height="12" rx="2"/><rect x="26" y="43" width="12" height="12" rx="2"/><rect x="43" y="43" width="12" height="12" rx="2"/></g><rect x="26" y="9" width="12" height="12" rx="2" fill="#ffc04d"/></svg><figcaption>32</figcaption></figure>
+        <figure><svg width="16" height="16" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12063a"/><g fill="#ff6f00"><rect x="9" y="9" width="14" height="14" rx="2"/><rect x="26" y="9" width="14" height="14" rx="2"/><rect x="43" y="9" width="14" height="14" rx="2"/><rect x="9" y="26" width="14" height="14" rx="2"/><rect x="26" y="26" width="14" height="14" rx="2"/><rect x="43" y="26" width="14" height="14" rx="2"/><rect x="9" y="43" width="14" height="14" rx="2"/><rect x="26" y="43" width="14" height="14" rx="2"/><rect x="43" y="43" width="14" height="14" rx="2"/></g><rect x="26" y="9" width="14" height="14" rx="2" fill="#ffc04d"/></svg><figcaption>16</figcaption></figure>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="art">
+        <svg viewBox="0 0 64 64" role="img" aria-label="the set with rabbit ears">
+          <rect width="64" height="64" rx="14" fill="#12063a"/>
+          <path d="M25 17 L15 5 M39 17 L49 5" stroke="#ffc04d" stroke-width="4" stroke-linecap="round"/>
+          <rect x="11" y="17" width="42" height="32" rx="7" fill="none" stroke="#ff6f00" stroke-width="4"/>
+          <path d="M19 33 h7 l4 -8 l6 15 l4 -7 h5" fill="none" stroke="#ffc04d" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h2>5 — RABBIT EARS</h2>
+      <p>A set with its antennae out and a signal inside it. The warmest of the five and the one that says "old television" fastest, at the cost of a busier shape at small sizes.</p>
+      <div class="sizes">
+        <figure><svg width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12063a"/><path d="M25 17 L15 5 M39 17 L49 5" stroke="#ffc04d" stroke-width="4" stroke-linecap="round"/><rect x="11" y="17" width="42" height="32" rx="7" fill="none" stroke="#ff6f00" stroke-width="4"/><path d="M19 33 h7 l4 -8 l6 15 l4 -7 h5" fill="none" stroke="#ffc04d" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg><figcaption>64</figcaption></figure>
+        <figure><svg width="32" height="32" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12063a"/><path d="M25 17 L15 5 M39 17 L49 5" stroke="#ffc04d" stroke-width="5" stroke-linecap="round"/><rect x="11" y="17" width="42" height="32" rx="7" fill="none" stroke="#ff6f00" stroke-width="4"/><path d="M19 33 h7 l4 -8 l6 15 l4 -7 h5" fill="none" stroke="#ffc04d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg><figcaption>32</figcaption></figure>
+        <figure><svg width="16" height="16" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12063a"/><path d="M25 17 L15 5 M39 17 L49 5" stroke="#ffc04d" stroke-width="6" stroke-linecap="round"/><rect x="11" y="17" width="42" height="32" rx="7" fill="none" stroke="#ff6f00" stroke-width="5"/><path d="M19 33 h7 l4 -8 l6 15 l4 -7 h5" fill="none" stroke="#ffc04d" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg><figcaption>16</figcaption></figure>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section">on a light tab bar</h2>
+  <div class="strip">
+    <div class="cell">
+      <div class="on-light">
+        <svg width="32" height="32" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12063a"/><circle cx="32" cy="32" r="20" fill="none" stroke="#ff6f00" stroke-width="4"/><path d="M32 32 L44 21" stroke="#ffc04d" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="32" r="6" fill="#ff6f00"/></svg>
+      </div><span>1 dial</span>
+    </div>
+    <div class="cell">
+      <div class="on-light">
+        <svg width="32" height="32" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12063a"/><rect x="9" y="15" width="46" height="31" rx="8" fill="none" stroke="#ff6f00" stroke-width="4"/><g stroke="#ffc04d" stroke-width="3" opacity="0.9" stroke-linecap="round"><path d="M17 25 H47"/><path d="M17 36 H47"/></g><path d="M21 53 H43" stroke="#ff6f00" stroke-width="4" stroke-linecap="round"/></svg>
+      </div><span>2 set</span>
+    </div>
+    <div class="cell">
+      <div class="on-light">
+        <svg width="32" height="32" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12063a"/><path d="M5 32 q7 -17 14 0 t14 0 t14 0 t14 0" fill="none" stroke="#ff6f00" stroke-width="6" stroke-linecap="round"/><circle cx="47" cy="32" r="5" fill="#ffc04d"/></svg>
+      </div><span>3 signal</span>
+    </div>
+    <div class="cell">
+      <div class="on-light">
+        <svg width="32" height="32" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12063a"/><g fill="#ff6f00"><rect x="9" y="9" width="12" height="12" rx="2"/><rect x="26" y="9" width="12" height="12" rx="2"/><rect x="43" y="9" width="12" height="12" rx="2"/><rect x="9" y="26" width="12" height="12" rx="2"/><rect x="26" y="26" width="12" height="12" rx="2"/><rect x="43" y="26" width="12" height="12" rx="2"/><rect x="9" y="43" width="12" height="12" rx="2"/><rect x="26" y="43" width="12" height="12" rx="2"/><rect x="43" y="43" width="12" height="12" rx="2"/></g><rect x="26" y="9" width="12" height="12" rx="2" fill="#ffc04d"/></svg>
+      </div><span>4 guide</span>
+    </div>
+    <div class="cell">
+      <div class="on-light">
+        <svg width="32" height="32" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12063a"/><path d="M25 17 L15 5 M39 17 L49 5" stroke="#ffc04d" stroke-width="5" stroke-linecap="round"/><rect x="11" y="17" width="42" height="32" rx="7" fill="none" stroke="#ff6f00" stroke-width="4"/><path d="M19 33 h7 l4 -8 l6 15 l4 -7 h5" fill="none" stroke="#ffc04d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div><span>5 ears</span>
+    </div>
+  </div>
+  <p class="note">
+    Each mark is a flat SVG with no fonts and no gradients, so it can be exported at any
+    size and dropped into the tab, the README, the GitHub avatar and the store listing
+    without redrawing. The small sizes above are the honest test — if a shape turns to
+    mush at 16, it is not the right one.
+  </p>
+</div>
