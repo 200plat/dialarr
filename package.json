@@ -1,0 +1,15 @@
+{
+  "name": "dialarr",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "test": "node scripts/test-engine.js && node scripts/test-durations.js && node scripts/test-live.js && node scripts/test-crashloop.js && node scripts/test-perf.js && node scripts/test-prefetch.js && node scripts/test-tracks.js && node scripts/test-langs.js && node scripts/test-footer.js"
+  },
+  "dependencies": {
+    "compression": "^1.8.2",
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.8.4"
+  }
+}

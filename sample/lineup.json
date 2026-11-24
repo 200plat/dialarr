@@ -1,0 +1,80 @@
+{
+  "channels": [
+    {
+      "id": "demo",
+      "dial": 5,
+      "emoji": "📼",
+      "name": "DIALARR DEMO",
+      "shows": [
+        {
+          "id": "show-sample",
+          "name": "Sample Feature",
+          "episodes": [
+            {
+              "id": "demo-1",
+              "title": "Test Pattern",
+              "src": "/media/test.mp4",
+              "duration": 30
+            },
+            {
+              "id": "demo-2",
+              "title": "Colour Bars",
+              "src": "/media/tape2.mp4",
+              "duration": 45
+            },
+            {
+              "id": "demo-3",
+              "title": "House Advertisement",
+              "src": "/media/ad.mp4",
+              "duration": 10
+            }
+          ]
+        }
+      ],
+      "versions": [
+        {
+          "v": 1,
+          "manifest": "manifests/demo/v1.json",
+          "epochMs": 1767225600000,
+          "effectiveAtMs": 1767225600000,
+          "startIndex": 0
+        }
+      ]
+    }
+  ],
+  "settings": {
+    "siteName": "DIALARR",
+    "chatEffects": true,
+    "chatRateLimit": 20,
+    "chatMode": "open",
+    "showViewerCount": true,
+    "viewerCountMin": 50,
+    "theme": {},
+    "transcodeHeight": 480,
+    "transcodeMaxSourceHeight": 1080,
+    "transcodeCacheBytes": 12884901888,
+    "transcodeLookahead": 2,
+    "liveStreamMax": 8,
+    "preTranscode": true
+  },
+  "users": {},
+  "bumps": [
+    {
+      "id": "sp-001",
+      "slides": [
+        {
+          "text": "welcome to the local network."
+        }
+      ]
+    },
+    {
+      "id": "sp-002",
+      "slides": [
+        {
+          "text": "we’ll be right back."
+        }
+      ]
+    }
+  ],
+  "bumpMs": 5000
+}
