@@ -1,0 +1,67 @@
+{
+  "items": [
+    {
+      "id": "demo-1",
+      "title": "Test Pattern",
+      "src": "/media/test.mp4",
+      "duration": 30
+    },
+    {
+      "id": "demo-ad-1",
+      "title": "Commercial",
+      "src": "",
+      "duration": 15,
+      "isAd": true,
+      "adSlides": [
+        "you’re watching dialarr.",
+        "brought to you by the local network.",
+        "this break is paid for in coffee. ☕",
+        "stay tuned — it gets weirder by channel 5."
+      ],
+      "music": "/media/ad-music.mp3"
+    },
+    {
+      "id": "demo-2",
+      "title": "Colour Bars",
+      "src": "/media/tape2.mp4",
+      "duration": 45
+    },
+    {
+      "id": "demo-ad-2",
+      "title": "Commercial",
+      "src": "",
+      "duration": 15,
+      "isAd": true,
+      "adSlides": [
+        "more after this break.",
+        "the local network never sleeps.",
+        "coffee fund: yes. adverts: no.",
+        "don’t go anywhere."
+      ],
+      "music": "/media/ad-music.mp3"
+    },
+    {
+      "id": "demo-3",
+      "title": "House Advertisement",
+      "src": "/media/ad.mp4",
+      "duration": 10
+    },
+    {
+      "id": "demo-ad-3",
+      "title": "Commercial",
+      "src": "",
+      "duration": 15,
+      "isAd": true,
+      "adSlides": [
+        "that’s all for this one.",
+        "more at the usual time.",
+        "still here. still on air.",
+        "see you on the next channel."
+      ],
+      "music": "/media/ad-music.mp3"
+    }
+  ],
+  "epochMs": 1767225600000,
+  "effectiveAtMs": 1767225600000,
+  "startIndex": 0
+}

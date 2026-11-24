@@ -1,0 +1,10 @@
+node_modules
+.git
+.gitignore
+*.log
+server.log
+data
+media
+Dockerfile
+docker-compose.yml
+.dockerignore

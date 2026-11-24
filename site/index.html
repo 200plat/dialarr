@@ -1,0 +1,246 @@
+<meta charset="utf-8">
+<title>Dialarr</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="24/7 cable TV from your own tapes. Every channel is a playlist looping from a fixed timestamp, so every viewer is watching the same second at the same time.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=VT323&display=swap">
+<link rel="stylesheet" href="styles.css">
+
+<div class="strip">
+  <div class="strip-in">
+    <span class="brand"><span class="brand-dot"></span>DIALARR</span>
+    <span class="strip-note">24/7 cable TV from your own tapes</span>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="hero-in">
+    <div class="hero-copy">
+      <h1>24/7 cable TV from your own tapes.</h1>
+      <p class="slides">there is no live stream.</p>
+      <p class="lede">
+        Every channel is a playlist looping from a fixed timestamp. Your browser works
+        out what is playing from its own clock, so everyone watching sees the same second
+        of the same film &mdash; with nothing to synchronise.
+      </p>
+      <p class="cta-row">
+        <a class="btn btn-live" href="https://itsbutters.uk/">Watch the live one</a>
+          <a class="btn" href="https://github.com/200plat/dialarr">Clone and run</a>
+      </p>
+    </div>
+    <div class="hero-tv">
+    <div class="crt">
+      <div class="crt-screen">
+        <div class="crt-osd">
+          <div class="osd-top">
+            <span class="onair"><span class="onair-dot"></span>ON AIR</span>
+            <span class="osd-stereo">STEREO</span>
+          </div>
+          <div class="osd-mid">
+            <span class="osd-num" id="osd-num">05</span>
+            <span class="osd-meta">
+              <span class="osd-ch" id="osd-ch">DIALARR DEMO</span>
+              <span class="osd-title" id="osd-title">Analog Hearts (1994)</span>
+            </span>
+          </div>
+          <div class="osd-bar"><span id="osd-fill"></span></div>
+          <div class="osd-foot">
+            <span id="osd-clock">00:00:00</span>
+            <span id="osd-pos">0:00 / 0:00</span>
+          </div>
+        </div>
+        <div class="crt-scan"></div>
+      </div>
+    </div>
+    <div class="dial" id="dial" role="group" aria-label="Channels"></div>
+    <p class="dial-hint">Pick a channel. Everything below moves with it.</p>
+    </div>
+  </div>
+</header>
+
+<section class="guide-section">
+  <div class="wrap">
+    <h2 class="h2">The guide</h2>
+    <p class="section-lede">
+      One grid for everybody. The line is where the channel is right now &mdash; and it is
+      in the same place on every screen in the house, because it is not sent to anyone.
+      It is worked out from the clock.
+    </p>
+    <div class="guide-frame">
+      <div class="guide-scroll">
+        <div class="tvg" id="guide">
+          <div class="tvg-head">
+            <div class="tvg-corner">ch / time</div>
+            <div class="tvg-axis" id="axis"></div>
+          </div>
+          <div id="guide-rows"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how-section">
+  <div class="wrap">
+    <h2 class="h2">How it stays in sync</h2>
+    <div class="how-grid">
+      <div class="how-card">
+        <div class="how-art art-playlist" aria-hidden="true">
+          <span class="blk w1"></span><span class="blk w2"></span><span class="blk w3"></span><span class="blk w4"></span>
+          <span class="art-epoch"></span>
+        </div>
+        <h3>A playlist, not a stream</h3>
+        <p>
+          A channel is a list of items &mdash; a title, a file, a length. Publishing it
+          writes the list to disk and stamps the moment the loop began.
+        </p>
+      </div>
+      <div class="how-card">
+        <div class="how-art art-loop" aria-hidden="true">
+          <span class="blk w1"></span><span class="blk w2"></span><span class="blk w3"></span><span class="blk w4"></span>
+          <span class="art-loopback">&#8635;</span>
+        </div>
+        <h3>It loops forever</h3>
+        <p>
+          The list plays end to end and starts again, so a channel always has something
+          on. A commercial is just an item flagged as a commercial.
+        </p>
+      </div>
+      <div class="how-card">
+        <div class="how-art art-clocks" aria-hidden="true">
+          <span class="mini-screen"></span><span class="mini-screen"></span><span class="mini-screen"></span>
+          <span class="art-now"></span>
+        </div>
+        <h3>Your clock decides</h3>
+        <p>
+          Everyone works out the same position from their own clock. Nobody is told what
+          to play, so there is nothing to keep in step &mdash; and it holds for a hundred
+          viewers as well as one.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="install-section">
+  <div class="wrap">
+    <h2 class="h2">Run it</h2>
+    <div class="term">
+      <div class="term-bar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span><span class="term-label">dialarr</span></div>
+      <pre class="term-body"><code><span class="c-prompt">$</span> git clone https://github.com/200plat/dialarr
+<span class="c-prompt">$</span> cd dialarr
+<span class="c-prompt">$</span> docker compose up -d --build
+<span class="c-out">then open</span> http://localhost:3005
+
+<span class="c-prompt">$</span> npm install &amp;&amp; npm start     <span class="c-out"># or without docker</span></code></pre>
+    </div>
+    <p class="install-note">
+      Drop files into <code>media/</code>, point some at archive.org, then build a
+      channel in the admin console. The console is behind a password you set in the
+      environment.
+    </p>
+  </div>
+</section>
+
+<section class="console-section">
+  <div class="wrap">
+    <h2 class="h2">The console that runs it</h2>
+    <p class="section-lede">
+      Everything happens in the admin console, and it is eight tabs in the order you
+      work in them. The channel list on the left, what that channel actually holds on
+      the right. A tab for the files that will not play, with the reason and the way to
+      fix each one. A tab for the cache, showing what is on air and what is only being
+      kept because eviction has not got round to it yet.
+    </p>
+    <div class="console-shot">
+      <img src="admin.jpg" alt="The Dialarr admin console: the Channels tab, with the channel list on the left and the library builder on the right" loading="lazy">
+    </div>
+    <ul class="console-tabs">
+      <li><b>Channels</b> the list, and everything about the one you picked</li>
+      <li><b>On air</b> every channel at once, and the controls to shift the broadcast</li>
+      <li><b>Transcode</b> the cache, and where the space went</li>
+      <li><b>Flags</b> the files that will not play, and how to fix them</li>
+      <li><b>Site</b> the name, the password, the theme, the footer boxes</li>
+      <li><b>Members &amp; Chat</b> who may chat, and who may not be here at all</li>
+      <li><b>Backup</b> back it up, move it, restore it</li>
+      <li><b>Info</b> version, memory, and what is mounted</li>
+    </ul>
+  </div>
+</section>
+
+<section class="eggs-section">
+  <div class="wrap">
+    <h2 class="h2">There are easter eggs</h2>
+    <div class="eggs-grid">
+      <div class="eggs-copy">
+        <p>
+          The row of buttons in the corner is not a decoration bolted on &mdash; it is
+          part of Dialarr. It is the same easter-egg layer the TV runs on: a star field,
+          a whale, the space station going over, fireworks, a portal, a cow, and a
+          handful of background scenes to sit behind it all.
+        </p>
+        <p>
+          Everything is on here by default. The eye opens and closes the bar, the gear
+          picks which effects you want, the theatre mask makes everybody stop, the
+          stars change the background, and the music button turns the soundtrack on.
+          Whatever you change, it is remembered the next time you come back.
+        </p>
+      </div>
+      <div class="eggs-bar" aria-hidden="true">
+        <span class="eggs-btn">&#127769;</span>
+        <span class="eggs-btn">&#128065;</span>
+        <span class="eggs-btn">&#127925;</span>
+        <span class="eggs-btn">1x</span>
+        <span class="eggs-btn">&#11042;</span>
+        <span class="eggs-btn">&#127961;</span>
+        <span class="eggs-btn">&#127917;</span>
+        <span class="eggs-btn">&#9661;</span>
+        <span class="eggs-btn">&#127800;</span>
+        <span class="eggs-btn">&#9881;</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="foot-section">
+  <div class="wrap">
+    <div class="licence">
+      <h3>PolyForm Noncommercial</h3>
+      <p>
+        Free for personal and non-commercial use. Get in touch before using it
+        commercially.
+      </p>
+    </div>
+    <p class="foot-links">
+      <a href="https://github.com/200plat/dialarr">Source</a>
+      <a href="https://itsbutters.uk/">Live instance</a>
+      <span class="foot-note">Built for friends, tapes and long nights.</span>
+    </p>
+  </div>
+</section>
+
+<script>
+  // The eggs remember their settings in the browser. This clears them once, so
+  // the page opens with everything on; after that the visitor's own choices stick.
+  try {
+    if (!localStorage.getItem('modelbay:landing-2')) {
+      localStorage.setItem('modelbay:landing-2', '1');
+      localStorage.setItem('modelbay:theme', '"nature"');
+      localStorage.setItem('modelbay:scene', '"desert"');
+      localStorage.setItem('modelbay:speed', '10');
+      for (const k of ['theme', 'scene', 'speed', 'flyers', 'toolbarOpen', 'eggToggle', 'eggTop']) localStorage.removeItem('modelbay:' + k);
+    }
+  } catch (e) {}
+</script>
+<script src="easter-eggs.js"></script>
+<script>
+  // The theme preset decides which eggs run and which layer they draw on, and it
+  // applies when the library loads. Put everything on top of the page after it.
+  (function () {
+    var b = document.getElementById('mb-btn-ontop');
+    if (b && b.textContent === '\u25bd') b.click();
+  })();
+</script>
+<script src="dial.js"></script>

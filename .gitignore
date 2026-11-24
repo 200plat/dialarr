@@ -1,0 +1,13 @@
+node_modules/
+*.log
+.DS_Store
+.env
+
+# Your own library and its playlists. data/ is seeded from sample/ on first run,
+# so it is deliberately not in version control — nothing you watch should end up
+# in a repository by accident.
+data/
+
+# Local scratch
+backups/
+public/media/

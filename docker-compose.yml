@@ -1,0 +1,22 @@
+services:
+  dialarr:
+    build: .
+    container_name: dialarr
+    ports:
+      - "3005:3005"
+    environment:
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
+      - PORT=${PORT:-3005}
+      - CONTENT_DIR=${CONTENT_DIR:-}
+      - MOVIES_DIR=${MOVIES_DIR:-}
+      - PROBE_TIMEOUT=${PROBE_TIMEOUT:-30000}
+      - TC_BAD_RETRY_MS=${TC_BAD_RETRY_MS:-3600000}
+    volumes:
+      - ./media:/app/media
+      - ./data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3005/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
